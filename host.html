@@ -1,236 +1,213 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Таинственный дом — командный квест (Host)</title>
-  <link rel="preload" href="intro.png" as="image">
-  <link rel="preload" href="library.png" as="image">
-  <link rel="preload" href="alchemy.png" as="image">
-  <link rel="preload" href="mirrors.png" as="image">
-  <link rel="preload" href="door.png" as="image">
-  <style>
-    :root{
-      --bg:#0f0f12;
-      --card:#17181d;
-      --muted:#9aa3af;
-      --text:#e8ecf2;
-      --accent:#ffb703;
-      --ok:#22c55e;
-      --warn:#f97316;
-      --bad:#ef4444;
-      --border:#22252c;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0;background:var(--bg);color:var(--text);
-      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;
-    }
-    .wrap{max-width:920px;margin:0 auto;padding:16px 16px 80px}
-    header{
-      position:sticky;top:0;z-index:20;
-      backdrop-filter:saturate(1.2) blur(6px);
-      background:linear-gradient(180deg, rgba(15,15,18,.9), rgba(15,15,18,.6));
-      border-bottom:1px solid var(--border);
-    }
-    .bar{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 16px}
-    h1{font-size:22px;margin:0}
-    .pill{
-      border:1px solid var(--border);background:#0f1116;color:#cbd5e1;
-      padding:8px 14px;border-radius:999px;cursor:pointer;font-weight:700;
-    }
-    .btn{cursor:pointer;border:none;border-radius:12px;padding:12px 16px;font-weight:700}
-    .btn.primary{background:var(--accent);color:#1d1600}
-    .btn.ghost{background:#11131a;border:1px solid var(--border);color:#dbe3ee}
-    .btn.ok{background:var(--ok);color:#05250f}
-    .btn.bad{background:var(--bad)}
-    .grid{display:grid;gap:16px}
-    .card{
-      background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;
-      box-shadow:0 8px 30px rgba(0,0,0,.25)
-    }
-    .hero{position:relative;min-height:180px;background:#111 url('intro.png') center/cover no-repeat}
-    .hero .shade{
-      position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.75));
-      display:flex;align-items:end;padding:18px
-    }
-    .hero h2{margin:0;font-size:24px}
-    .pad{padding:18px}
-    .muted{color:var(--muted)}
-    .img{
-      width:100%;height:260px;background:#111 center/cover no-repeat;border-bottom:1px solid var(--border)
-    }
-    .room-title{font-size:22px;margin:0 0 6px}
-    input[type=text]{
-      width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--border);
-      background:#0e1016;color:var(--text);outline:none
-    }
-    .hint{font-size:13px;color:var(--muted)}
-    .ok-badge{color:var(--ok);font-weight:700}
-    .overlay{
-      position:fixed;inset:0;background:rgba(0,0,0,.6);
-      display:none;align-items:center;justify-content:center;z-index:99
-    }
-    .overlay .panel{
-      background:#12141b;border:1px solid var(--border);border-radius:18px;
-      padding:22px;max-width:560px;text-align:center
-    }
-    .team-name{font-size:28px;margin:4px 0 12px}
-    .teams-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-    .chip{padding:8px 12px;border-radius:999px;background:#0e1118;border:1px solid var(--border)}
-    .sep{height:1px;background:var(--border);margin:12px 0}
-    .hidden{display:none}
-    .footer-note{font-size:12px;color:#808894}
-    .spacer{height:18px}
-    .ghost-panel{
-      position:fixed;right:12px;bottom:12px;z-index:98;
-      background:#10131a;border:1px solid var(--border);border-radius:14px;padding:14px;display:none;max-width:360px
-    }
-    .ghost-panel h4{margin:0 0 8px}
-    .kudos{color:#a7f3d0}
-    .progress{font-size:13px;color:#aeb6c6}
-    .inline{display:inline-block}
-    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Таинственный дом — командный квест</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #0d0e10;
+    color: #f3f3f3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 800px;
+    padding: 20px;
+    text-align: center;
+  }
+  h1, h2 { color: #ffb703; }
+  img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin: 12px 0;
+  }
+  button {
+    background: #ffb703;
+    color: #1a1a1a;
+    border: none;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 15px;
+  }
+  button:hover { background: #ffcb45; }
+  input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    margin-top: 8px;
+    background: #1a1a1a;
+    color: #fff;
+    text-align: center;
+    font-size: 16px;
+  }
+  .hidden { display: none; }
+  .ok { color: #22c55e; font-weight: bold; }
+</style>
 </head>
 <body>
-  <header>
-    <div class="bar">
-      <h1>Таинственный дом — командный квест</h1>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button id="ghostBtn" class="pill">ПРИЗРАКИ</button>
-        <button id="startBtn" class="btn ghost">Старт</button>
-        <button id="resetBtn" class="btn ghost">Сброс</button>
-      </div>
-    </div>
-  </header>
+  <div class="container">
+    <h1>Таинственный дом</h1>
+    <div id="game"></div>
+  </div>
 
-  <div class="wrap">
+<script>
+const $ = s => document.querySelector(s);
+const state = { step: 0, team: null };
 
-    <!-- Введение -->
-    <section id="introCard" class="card">
-      <div class="hero">
-        <div class="shade">
-          <div>
-            <h2>Вы у порога таинственного дома…</h2>
-            <p class="muted">Нажмите «Старт», чтобы дом распределил всех на команды и впустил внутрь.</p>
-          </div>
-        </div>
-      </div>
-      <div class="pad">
-        <p class="muted">Команды: <b>Тёплые огни</b> и <b>Ночные искатели</b>.  
-          После распределения на экране появится ваша команда — разбейтесь в жизни и начинайте!</p>
-      </div>
-    </section>
-
-    <!-- Комната 1 -->
-    <section id="room1" class="card hidden">
-      <div class="img" style="background-image:url('library.png')"></div>
-      <div class="pad">
-        <h3 class="room-title">Комната 1. Библиотека — «Ключ из букв»</h3>
-        <p>Хлопает дверь… Пахнет бумагой и чернилами.  
-          На пюпитре записка: <i>«Знание — дверь. Собери слово — открой путь».</i></p>
-        <p><b>Найдите предметы:</b> по одному на буквы К, Н, И, Г, А.  
-          Примеры: кружка, носок, игрушка, гребень, альбом.  
-          Первые буквы сложите в слово и введите его ниже.</p>
-        <input id="r1" type="text" placeholder="введите слово">
-        <div class="spacer"></div>
-        <button class="btn primary" id="r1check">Проверить</button>
-        <p id="r1status" class="hint"></p>
-      </div>
-    </section>
-
-    <!-- Комната 2 -->
-    <section id="room2" class="card hidden">
-      <div class="img" style="background-image:url('alchemy.png')"></div>
-      <div class="pad">
-        <h3 class="room-title">Комната 2. Алхимик — «Тёплый вечер»</h3>
-        <p>Колбы мерцают. На столе рецепт — дом ждёт действий.</p>
-        <p><b>Сварите зелье:</b></p>
+const ROOMS = [
+  {
+    key: 'intro',
+    title: 'Распределение на команды',
+    img: 'intro.png',
+    story: 'Дом шепчет свои тайны… Он делит вас на команды. Подождите и узнайте, с кем вы сражаетесь бок о бок.',
+    render(container, helpers) {
+      container.innerHTML = `
+        <p>Команды: <b>Тёплые огни</b> и <b>Ночные искатели</b></p>
+        <button id="assign">Распределить команду</button>
+        <div id="teamResult" class="hidden">
+          <h2 id="teamName"></h2>
+          <p>Разделитесь в реальности на команды и готовьтесь к испытанию.</p>
+          <button id="goStart">Войти в дом</button>
+        </div>`;
+      $("#assign").onclick = () => {
+        const team = Math.random() < 0.5 ? 'Тёплые огни' : 'Ночные искатели';
+        state.team = team;
+        $("#assign").classList.add('hidden');
+        $("#teamResult").classList.remove('hidden');
+        $("#teamName").textContent = team;
+      };
+      $("#goStart").onclick = () => helpers.next();
+    }
+  },
+  {
+    key: 'library',
+    title: 'Комната 1. Библиотека — «Ключ из букв»',
+    img: 'library.png',
+    story: 'Дверь хлопает за вами. Пахнет пылью и старой бумагой. На столе лежит записка: «Знание — это дверь. Открой её словом».',
+    render(container, helpers) {
+      container.innerHTML = `
+        <p>Найдите в квартире предметы, начинающиеся на буквы <b>К, Н, И, Г, А</b>.<br>
+        Примеры: кружка, носок, игрушка, гребень, альбом.<br>
+        Первые буквы сложите в слово и введите его ниже.</p>
+        <input id="ans1" placeholder="введите слово">
+        <button id="check1">Проверить</button>
+        <p id="res1"></p>`;
+      $("#check1").onclick = () => {
+        const val = $("#ans1").value.trim().toLowerCase();
+        if (val === "книга") {
+          $("#res1").innerHTML = `<span class="ok">Верно! Полки дрогнули и открыли проход...</span>`;
+          setTimeout(helpers.next, 800);
+        } else $("#res1").textContent = "Попробуйте ещё раз.";
+      };
+    }
+  },
+  {
+    key: 'alchemy',
+    title: 'Комната 2. Алхимик — «Зелье спокойствия»',
+    img: 'alchemy.png',
+    story: 'Сияют колбы, пахнет чаем и специями. Дом ждёт, когда вы приготовите зелье вместе.',
+    render(container, helpers) {
+      container.innerHTML = `
+        <p><b>Сварите зелье «Спокойствия»:</b></p>
         <ol>
-          <li>Заварите чай.</li>
-          <li>Добавьте ягоды или варенье.</li>
+          <li>Кружка горячего чая (чёрный или зелёный).</li>
+          <li>Добавьте ягоды или ложку варенья.</li>
           <li>Размешайте ложку мёда.</li>
-          <li>Щепотка корицы или имбиря — по вкусу.</li>
-          <li>При желании немного молока.</li>
+          <li>Щепотку корицы или имбиря.</li>
+          <li>По желанию немного молока.</li>
         </ol>
-        <p>Когда зелье готово и ведущая одобряет — нажмите кнопку.</p>
-        <button class="btn primary" id="r2hold">Ведущая подтверждает</button>
-        <p id="r2status" class="hint"></p>
-      </div>
-    </section>
-
-    <!-- Комната 3 -->
-    <section id="room3" class="card hidden">
-      <div class="img" style="background-image:url('mirrors.png')"></div>
-      <div class="pad">
-        <h3 class="room-title">Комната 3. Зеркала — «Эстафета отражений»</h3>
-        <p>Стены отражают движения.  
-          Шёпот: <i>«Только те, кто умеют повторять друг друга, пройдут дальше…»</i></p>
-        <p>Первый игрок показывает движение. Второй повторяет и добавляет своё,  
-          третий — повторяет два и добавляет третье и так далее.  
-          Когда цепочка выполнена без ошибок — ведущая подтверждает.</p>
-        <button class="btn primary" id="r3hold">Ведущая подтверждает</button>
-        <p id="r3status" class="hint"></p>
-      </div>
-    </section>
-
-    <!-- Комната 4 -->
-    <section id="room4" class="card hidden">
-      <div class="img" style="background-image:url('door.png')"></div>
-      <div class="pad">
-        <h3 class="room-title">Комната 4. Последняя дверь — «Три замка»</h3>
-        <p>На двери — три замка. Каждый ждёт своё слово.</p>
-
+        <p>Когда готово и ведущая одобряет — нажмите кнопку.</p>
+        <button id="hold">Ведущая подтверждает</button>
+        <p id="res2"></p>`;
+      let t = null;
+      $("#hold").addEventListener("pointerdown", () => {
+        t = setTimeout(() => {
+          $("#res2").innerHTML = `<span class="ok">Дом доволен. Зелье согрело стены...</span>`;
+          setTimeout(helpers.next, 800);
+        }, 2000);
+      });
+      ["pointerup","pointerleave","pointercancel"].forEach(ev =>
+        $("#hold").addEventListener(ev, () => clearTimeout(t))
+      );
+    }
+  },
+  {
+    key: 'mirrors',
+    title: 'Комната 3. Зеркала — «Эстафета отражений»',
+    img: 'mirrors.png',
+    story: 'Стены отражают каждое движение. Шёпот домовёнка: «Только те, кто действуют как одно, пройдут дальше».',
+    render(container, helpers) {
+      container.innerHTML = `
+        <p>Первый игрок показывает движение. Следующий повторяет и добавляет своё.<br>
+        Когда цепочка выполнена без ошибок — ведущая подтверждает.</p>
+        <button id="hold2">Ведущая подтверждает</button>
+        <p id="res3"></p>`;
+      let t = null;
+      $("#hold2").addEventListener("pointerdown", () => {
+        t = setTimeout(() => {
+          $("#res3").innerHTML = `<span class="ok">Отражения сложились. Путь открыт!</span>`;
+          setTimeout(helpers.next, 800);
+        }, 2000);
+      });
+      ["pointerup","pointerleave","pointercancel"].forEach(ev =>
+        $("#hold2").addEventListener(ev, () => clearTimeout(t))
+      );
+    }
+  },
+  {
+    key: 'door',
+    title: 'Финальная дверь — «Три замка»',
+    img: 'door.png',
+    story: 'На массивной двери три замка. Чтобы выбраться, нужно разгадать их все.',
+    render(container, helpers) {
+      container.innerHTML = `
         <p><b>Замок I:</b> «Без ног хожу, без языка говорю, за солнцем иду, ночью сплю. Кто я?»</p>
-        <input id="z1" type="text" placeholder="слово-ключ (ж.р.)">
-
+        <input id="z1" placeholder="слово-ключ (ж.р.)">
         <p><b>Замок II:</b> «Её не видно, но все чувствуют. Она согревает дом, даже если в нём нет огня. Что это?»</p>
-        <input id="z2" type="text" placeholder="слово-ключ (ж.р.)">
+        <input id="z2" placeholder="слово-ключ (ж.р.)">
+        <p><b>Замок III:</b> «Она всегда идёт вперёд, никогда не возвращается, и никто не может её остановить. Что это?»</p>
+        <input id="z3" placeholder="слово-ключ (ср.р.)">
+        <button id="doorCheck">Проверить</button>
+        <p id="res4"></p>`;
+      $("#doorCheck").onclick = () => {
+        const n = s => s.trim().toLowerCase().replaceAll('ё','е');
+        const a1 = n($("#z1").value);
+        const a2 = n($("#z2").value);
+        const a3 = n($("#z3").value);
+        if (a1 === "тень" && a2 === "любовь" && a3 === "время") {
+          $("#res4").innerHTML = `<span class="ok">Все замки щёлкнули. Дверь распахнулась — вы выбрались!</span>`;
+        } else {
+          $("#res4").textContent = "Не все замки открылись. Обсудите и попробуйте снова!";
+        }
+      };
+    }
+  }
+];
 
-        <p><b>Замок III:</b> «Она всегда идёт вперёд, никогда не возвращается и никто не может её остановить. Что это?»</p>
-        <input id="z3" type="text" placeholder="слово-ключ (ср.р.)">
-
-        <div class="spacer"></div>
-        <button class="btn primary" id="finalCheck">Открыть дверь</button>
-        <p id="finalStatus" class="hint"></p>
-      </div>
-    </section>
-  </div>
-
-  <!-- Панель ведущей -->
-  <div id="ghostPanel" class="ghost-panel">
-    <h4>Панель ведущей</h4>
-    <ul>
-      <li>Комната 1 — пароль: <code>КНИГА</code></li>
-      <li>Комната 2 — удержать кнопку ~2 сек</li>
-      <li>Комната 3 — удержать кнопку ~2 сек</li>
-      <li>Комната 4 — ответы: <code>тень</code>, <code>любовь</code>, <code>время</code></li>
-    </ul>
-  </div>
-
-  <script>
-    const qs=s=>document.querySelector(s);
-    const show=el=>el.classList.remove('hidden');
-    const hide=el=>el.classList.add('hidden');
-    const norm=s=>(s||'').trim().toLowerCase().replaceAll('ё','е');
-    const state=JSON.parse(localStorage.getItem('quest_state')||'{}');
-    function save(){localStorage.setItem('quest_state',JSON.stringify(state));}
-    function setStep(n){state.step=n;save();['room1','room2','room3','room4'].forEach((id,i)=>{const el=qs('#'+id);i<n?show(el):hide(el)});}
-    qs('#startBtn').onclick=()=>{setStep(1);}
-    qs('#resetBtn').onclick=()=>{localStorage.removeItem('quest_state');location.reload();}
-    // room1
-    qs('#r1check').onclick=()=>{if(norm(qs('#r1').value)==='книга'){qs('#r1status').innerHTML='<span class="ok-badge">Верно! Дверь открылась.</span>';setTimeout(()=>setStep(2),600);}else{qs('#r1status').textContent='Пока не то.';}}
-    // room2 hold
-    (function(){const btn=qs('#r2hold');let t;function down(){t=setTimeout(()=>{qs('#r2status').innerHTML='<span class="ok-badge">Зелье одобрено!</span>';setTimeout(()=>setStep(3),600);},2000);}function up(){clearTimeout(t);}['mousedown','touchstart'].forEach(ev=>btn.addEventListener(ev,down));['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>btn.addEventListener(ev,up));})();
-    // room3 hold
-    (function(){const btn=qs('#r3hold');let t;function down(){t=setTimeout(()=>{qs('#r3status').innerHTML='<span class="ok-badge">Зеркала расступились!</span>';setTimeout(()=>setStep(4),600);},2000);}function up(){clearTimeout(t);}['mousedown','touchstart'].forEach(ev=>btn.addEventListener(ev,down));['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=>btn.addEventListener(ev,up));})();
-    // room4
-    qs('#finalCheck').onclick=()=>{const a1=norm(qs('#z1').value),a2=norm(qs('#z2').value),a3=norm(qs('#z3').value);if(a1==='тень'&&a2==='любовь'&&a3==='время'){qs('#finalStatus').innerHTML='<span class="ok-badge">Все три замка щёлкнули. Вы выбрались!</span>';setStep(5);}else{qs('#finalStatus').textContent='Пока не все замки открылись.'}}
-    // ghost toggle
-    qs('#ghostBtn').onclick=()=>{const p=qs('#ghostPanel');p.style.display=p.style.display==='block'?'none':'block';}
-    if(state.step)setStep(state.step);
-  </script>
+function renderStep() {
+  const room = ROOMS[state.step];
+  if (!room) return;
+  $("#game").innerHTML = `
+    <h2>${room.title}</h2>
+    <img src="${room.img}" alt="">
+    <p>${room.story}</p>`;
+  room.render($("#game"), { next: nextStep });
+}
+function nextStep() {
+  state.step++;
+  if (state.step >= ROOMS.length) state.step = ROOMS.length - 1;
+  renderStep();
+}
+renderStep();
+</script>
 </body>
 </html>
