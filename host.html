@@ -3,17 +3,13 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Halloween Escape — Командный режим</title>
+<title>Таинственный дом — Командный квест</title>
 <style>
-  :root{
-    --bg:#0a0a0e; --panel:#121218; --ink:#f2eddc; --muted:#b7b0a2; --accent:#d4a373;
-  }
+  :root{ --bg:#0a0a0e; --panel:#121218; --ink:#f2eddc; --muted:#b7b0a2; --accent:#d4a373; }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,serif}
-  #wrap{position:relative;min-height:100%;display:flex;align-items:center;justify-content:center;
-        background-size:cover;background-position:center}
-  .shell{width:min(920px,92vw);margin:48px 0;background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.08);
-         border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  #wrap{position:relative;min-height:100%;display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center}
+  .shell{width:min(920px,92vw);margin:48px 0;background:rgba(0,0,0,.78);border:1px solid rgba(255,255,255,.08);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
   header{padding:18px 22px;border-bottom:1px solid rgba(255,255,255,.09);display:flex;justify-content:space-between;align-items:center}
   header h1{font-size:20px;margin:0}
   .teamTag{padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);display:none}
@@ -21,14 +17,13 @@
   .teamTag.hunters{background:rgba(255,139,106,.18);border-color:rgba(255,139,106,.45)}
   main{padding:22px}
   .title{margin:0 0 8px;font-size:26px}
-  .subtitle{margin:0 0 18px;color:var(--muted)}
+  .subtitle{margin:0 0 18px;color:var(--muted);line-height:1.55}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
   .btn{background:var(--accent);color:#1a1510;border:none;border-radius:10px;padding:12px 18px;font-size:16px;cursor:pointer}
   .btn.secondary{background:transparent;color:var(--ink);border:1px solid rgba(255,255,255,.2)}
   .pad{padding:14px 16px;border:1px dashed rgba(255,255,255,.2);border-radius:12px;background:rgba(255,255,255,.04)}
   .field{display:flex;gap:10px;align-items:center;margin-top:10px}
-  input[type="text"]{flex:1;min-width:180px;background:#0f0f14;border:1px solid rgba(255,255,255,.22);color:var(--ink);
-                     border-radius:10px;padding:12px 14px;font-size:16px}
+  input[type="text"]{flex:1;min-width:180px;background:#0f0f14;border:1px solid rgba(255,255,255,.22);color:var(--ink);border-radius:10px;padding:12px 14px;font-size:16px}
   .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.16);margin-bottom:10px}
   .lock{display:inline-flex;align-items:center;gap:8px}
   .lock svg{width:20px;height:20px}
@@ -66,7 +61,7 @@ const TEAMS = [
   {name:"Охотники",   cls:"hunters"}
 ];
 
-// сюжетные комнаты
+// сцены с рассказом и загадками
 const SCENES = [
   { // 0 — пролог
     bg:"intro.png",
@@ -74,10 +69,10 @@ const SCENES = [
       return `
         <h2 class="title">Полуночный пролог</h2>
         <p class="subtitle">
-          Когда часы пробили двенадцать, дверь заскрипела — и вы шагнули внутрь. 
-          Дом будто <i>ожил</i>: шёпот в коридорах, тени за углом и замки на каждой двери. 
-          Выберите «Мне повезёт» — дом сам разделит вас на команды. 
-          Ваша цель — успеть выбраться до того, как часы снова пробьют полночь.
+          Часы бьют двенадцать. Сквозняк гасит свечу — и дверь за вами <i>захлопывается</i>. 
+          Дом будто проснулся: из коридора доносится шёпот, где-то дальше бряцает цепь. 
+          В темноте вспыхивает табличка: «Только те, кто действует вместе, найдут выход».<br><br>
+          Нажмите «Мне повезёт» — дом сам разделит вас на команды. Держитесь друг друга — впереди комнаты с замками.
         </p>
         <div class="center">
           <button class="btn" id="lucky">Мне повезёт</button>
@@ -95,40 +90,49 @@ const SCENES = [
   { // 1 — библиотека
     bg:"library.png",
     title:"Комната 1 — Библиотека шёпотов",
-    lore:`В пыли вековых полок кто-то оставил рифмованную подсказку. 
-          Страницы шелестят, будто подсказывают три первые буквы ключа…`,
-    task:`<b>Офлайн-задание:</b> найдите <b>3 предмета</b>, начинающиеся на буквы <b>Т</b>, <b>К</b> и <b>В</b>. 
-           Сложите их в одно слово и шёпотом произнесите его все вместе. 
-           Затем введите слово-ключ, чтобы «снять замок».`,
+    lore:`Пыльные переплёты шуршат сами собой. На корешках первых рядов проступают буквы — будто дом подсказывает начало ключа.`,
+    riddle:`На листе в витрине выцарапано:<br>
+            «Если собрать меня по кусочкам из осени и огней,<br>
+            я стану символом ночи — и ключом для твоих дверей».`,
+    task:`<b>Подсказка к действию:</b> найдите <b>3 предмета</b>, начинающиеся на буквы <b>Т</b>, <b>К</b> и <b>В</b> — 
+           вместе они складываются в слово-ключ. Произнесите его шёпотом и введите ниже.`,
     inputPlaceholder:"слово-ключ…",
     answers:["ТЫКВА","TYKVA"]
   },
   { // 2 — лаборатория
     bg:"alchemy.png",
     title:"Комната 2 — Лаборатория алхимика",
-    lore:`Пузырьки в ретортах мерцают фиолетовым. На столе записка: «Смешай то, что даёт силу ночи».`,
-    task:`Соберите «зелье бодрости» из <b>трёх предметов разных цветов</b>: оранжевый, фиолетовый и чёрный. 
-           Сложите их вместе и произнесите вслух <b>заклинание из 10 слов</b>. 
-           После ритуала введите ключ <i>ЭЛИКСИР</i>.`,
-    inputPlaceholder:"ЭЛИКСИР",
+    lore:`На столах — реторты и флаконы. На доске мелом: «Сладкое и горькое я превращаю в силу. 
+          Я не вода, но меня пьют. Я не лекарство, но лечу».`,
+    riddle:`Книжный рецепт шепчет:<br>
+            «В моё имя спрятаны семь букв, и в каждой — обещание перемен.<br>
+            Назови меня — и стеклянный замок отступит».`,
+    task:`<b>Подсказка к действию:</b> обсудите вслух, что описано в надписи. 
+           Когда будете готовы — введите название этого напитка-чуда.`,
+    inputPlaceholder:"введите ключ…",
     answers:["ЭЛИКСИР","ELIKSIR","ELIXIR","ЕЛИКСИР"]
   },
   { // 3 — зеркальный зал
     bg:"mirrors.png",
     title:"Комната 3 — Зеркальный зал",
-    lore:`Отражения делают шаг вперёд раньше вас. Кажется, зеркалам нужна синхронность.`,
-    task:`Выполните <b>синхронный «танец призраков» 15 секунд</b> и замрите в одинаковой позе. 
-           Потом введите ключ <i>ЭХО</i> — отражения отступят.`,
-    inputPlaceholder:"ЭХО",
+    lore:`Зеркала дышат холодом. Шёпот повторяет ваши слова раньше, чем вы их произносите — будто дом отвечает вам.`,
+    riddle:`Над трещиной в серебре написано:<br>
+            «У меня нет тела, но я возвращаюсь всякий раз, когда меня зовут.<br>
+            Меня не увидишь, но услышишь» — назови меня.`,
+    task:`<b>Подсказка к действию:</b> скажите одно и то же слово одновременно всей командой — 
+           зал любит синхронность. Затем введите ответ.`,
+    inputPlaceholder:"ответ…",
     answers:["ЭХО","EHO","ECHO"]
   },
   { // 4 — финальная дверь
     bg:"door.png",
     title:"Финальная дверь",
-    lore:`Замок глухо вздыхает. Дом ждёт последний знак.`,
-    task:`Одновременно издайте <b>три разных звука</b> — ветер, скрип и шаги. 
-           После чего громко произнесите вслух своё командное слово. 
-           Нажмите «Открыть дверь», когда будете готовы.`,
+    lore:`Тяжёлый засов дрожит. Дом словно складывает ваши шаги в единую мелодию.`,
+    riddle:`Голос за дверью шепчет:<br>
+            «Назови три моих дара подряд — плод ночи, сила перемен и голос стен —<br>
+            и я отпущу вас до следующей полуночи».`,
+    task:`<b>Ритуал выхода:</b> шёпотом произнесите подряд три ключевых слова, найденных в комнатах, 
+           затем громко скажите «ОТКРОЙСЯ». Когда будете готовы — нажмите кнопку.`,
     buttonOnly:true
   },
   { // 5 — финал
@@ -149,7 +153,7 @@ function normalize(s){
 function showTeamSplash(team){
   setBG("intro.png");
   $("#card").classList.add("fade");
-  $("#teamTag").style.display="block";
+  teamTag.style.display="block";
   teamTag.className="teamTag "+team.cls;
   teamTag.textContent="Команда: "+team.name;
 
@@ -161,7 +165,7 @@ function showTeamSplash(team){
       </div>
     </div>
     <p class="subtitle center" style="margin-top:4px">
-      Разделитесь в комнате по командам и держитесь вместе — дом слышит только тех, кто действует синхронно.
+      Разделитесь в комнате по командам и держитесь вместе — дом слышит тех, кто действует синхронно.
     </p>
     <div class="center" style="margin-top:10px">
       <button class="btn" id="startQuest">Войти в дом</button>
@@ -190,7 +194,7 @@ function renderScene(){
     return;
   }
 
-  // комната
+  // комната: рассказ + загадка + ввод ключа
   main.innerHTML = `
     <div class="badge lock">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V6a5 5 0 00-5-5zm-3 8V6a3 3 0 016 0v3H9z"/></svg>
@@ -198,6 +202,7 @@ function renderScene(){
     </div>
     <h2 class="title">${s.title}</h2>
     ${s.lore ? `<p class="subtitle">${s.lore}</p>` : ``}
+    ${s.riddle ? `<p class="subtitle"><i>${s.riddle}</i></p>` : ``}
     <p class="subtitle">${s.task}</p>
     ${s.buttonOnly ? `
       <div class="center">
