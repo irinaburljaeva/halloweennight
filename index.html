@@ -33,7 +33,28 @@ p{color:var(--muted);max-width:520px;margin:0 auto 30px;}
 footer{margin-top:30px;color:var(--muted);font-size:14px}
 button{border:none;border-radius:12px;padding:12px 20px;font-weight:900;font-size:16px;cursor:pointer;}
 .btn{background:var(--accent);color:#000;}
-
+.lang-switch {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(30, 30, 35, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 6px 10px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.4);
+  z-index: 2000;
+}
+.lang-switch img {
+  width: 22px;
+  height: 16px;
+  border-radius: 2px;
+}
+  
 /* Модальное окно */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:1000;}
 .modal-box{background:#15161c;border:1px solid #2c2e36;border-radius:16px;padding:30px 24px;max-width:420px;width:90%;text-align:center;}
@@ -183,6 +204,26 @@ modal.addEventListener('click',e=>{ if(e.target===modal){ modal.style.display='n
 const saved = localStorage.getItem('hn_lang') || 'ru';
 applyLang(saved);
 $('#lang').addEventListener('change', e=> applyLang(e.target.value));
+<div class="lang-switch" onclick="toggleLang()">
+  <img id="langFlag" src="https://flagcdn.com/w20/ru.png" alt="Lang">
+  <span id="langText">Рус</span>
+</div>
+
+<script>
+let lang = localStorage.getItem('lang') || 'ru';
+function toggleLang(){
+  lang = (lang === 'ru') ? 'es' : 'ru';
+  localStorage.setItem('lang', lang);
+  document.getElementById('langText').textContent = (lang === 'ru') ? 'Рус' : 'Esp';
+  document.getElementById('langFlag').src = (lang === 'ru')
+    ? 'https://flagcdn.com/w20/ru.png'
+    : 'https://flagcdn.com/w20/es.png';
+  location.reload();
+}
+document.getElementById('langText').textContent = (lang === 'ru') ? 'Рус' : 'Esp';
+document.getElementById('langFlag').src = (lang === 'ru')
+  ? 'https://flagcdn.com/w20/ru.png'
+  : 'https://flagcdn.com/w20/es.png';
 </script>
 
 </body>
