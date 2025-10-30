@@ -1,68 +1,107 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Командный квест — Halloween Night</title>
+<title>Мистический дом — Распределение команд</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  body{margin:0;background:#0d0d0d;color:#f3e9d2;font-family:Georgia,serif;display:flex;min-height:100vh}
-  .wrap{margin:auto;max-width:860px;padding:24px}
-  .card{background:rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:22px}
-  .btn{display:inline-block;background:#d4a373;color:#1b1b1b;border:none;border-radius:10px;padding:12px 20px;font-size:16px;cursor:pointer}
-  .hint{opacity:.8}
-  .badge{display:inline-block;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 10px;margin-bottom:10px}
+:root{
+  --bg:#0d0d10; --accent:#ffb703;
+  --ghost:#7dd3fc; --hunters:#fca5a5;
+}
+body{
+  margin:0; padding:0;
+  background: radial-gradient(circle at 50% 40%, #1c1f26 0%, #0d0d10 80%);
+  font-family:'Montserrat',sans-serif;
+  color:#fff; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  height:100vh; overflow:hidden; text-align:center;
+}
+h1{font-weight:900;font-size:clamp(22px,4vw,38px);margin:0 0 10px}
+p{margin:0 0 20px;color:#ccc;max-width:500px}
+button{
+  background:var(--accent);color:#000;border:none;
+  font-weight:900;font-size:18px;
+  padding:14px 28px;border-radius:14px;cursor:pointer;
+  transition:all .3s ease;
+}
+button:hover{transform:scale(1.05)}
+#scanArea{
+  margin-top:40px;width:220px;height:220px;
+  border-radius:50%;background:rgba(255,255,255,0.05);
+  box-shadow:0 0 40px #000 inset, 0 0 15px rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;
+  overflow:hidden;
+}
+#scanArea::before{
+  content:"";position:absolute;width:100%;height:100%;
+  background:conic-gradient(from 0deg,transparent 0deg,rgba(255,255,255,0.1) 90deg,transparent 180deg);
+  animation:spin 3s linear infinite;opacity:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+#scanArea.scanning::before{opacity:1}
+#result{
+  margin-top:30px;font-weight:900;font-size:clamp(20px,3.5vw,30px);
+  min-height:40px;
+}
+#result.ghost{color:var(--ghost)}
+#result.hunters{color:var(--hunters)}
+.fadeIn{animation:fadeIn .5s ease forwards}
+@keyframes fadeIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+.small{font-size:14px;color:#999;margin-top:12px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div id="panel" class="card"></div>
-</div>
+  <h1>Распределение по командам</h1>
+  <p>Дом чувствует вашу энергию…  
+  Приложите руку к кругу, чтобы он определил, кто вы — <b>Призрак</b> или <b>Охотник</b>.</p>
+
+  <div id="scanArea">👆</div>
+  <div id="result"></div>
+  <div class="small">После распределения — откройте <b>host.html</b> и выберите свою команду.</div>
+
 <script>
-const $ = s=>document.querySelector(s);
-const panel = $("#panel");
-const TEAMS = ["Призраки","Охотники"];
-const SCENES = [
-  { html: `
-      <h2>Halloween Night</h2>
-      <p class="hint">Система случайно распределит вас по командам и квест начнётся.</p>
-      <button class="btn" id="lucky">Мне повезёт</button>
-    `},
-  { html: `
-      <div class="badge">Комната 1 — Библиотека шёпотов</div>
-      <p><b>Задание (офлайн):</b> найдите 3 предмета на буквы <b>Т—Ы—К</b>. Сложите из них слово и покажите ведущему.</p>
-      <button class="btn" id="next">Дальше</button>
-    `},
-  { html: `
-      <div class="badge">Комната 2 — Лаборатория алхимика</div>
-      <p><b>Задание:</b> соберите «зелье» из предметов трёх цветов: оранжевый, чёрный, фиолетовый. Произнесите заклинание из 10 слов.</p>
-      <button class="btn" id="next">Дальше</button>
-    `},
-  { html: `
-      <div class="badge">Комната 3 — Зеркальный зал</div>
-      <p><b>Задание:</b> синхронный танец 15 секунд и «заморозка» в одной позе. Снимите короткое видео.</p>
-      <button class="btn" id="next">Дальше</button>
-    `},
-  { html: `
-      <div class="badge">Финальная дверь</div>
-      <p><b>Задание:</b> одновременно издайте 3 звука (ветер/скрип/шаги), затем вслух произнесите первое слово истории из игры «шёпот».</p>
-      <button class="btn" id="next">Финиш</button>
-    `},
-  { html: `<h2>🔓 Свобода!</h2><p>Вы прошли квест. Счастливого Хэллоуина! 🎃</p>`}
+const TEAMS = [
+  { id:'ghosts',  name:'ПРИЗРАКИ', color:'ghost' },
+  { id:'hunters', name:'ОХОТНИКИ', color:'hunters' }
 ];
-let i = 0;
-function render(){
-  panel.innerHTML = SCENES[i].html;
-  const lucky=$("#lucky"), next=$("#next");
-  if(lucky){
-    lucky.onclick=()=>{
-      const team = TEAMS[Math.floor(Math.random()*TEAMS.length)];
-      alert("Твоя команда: "+team);
-      i=1; render();
-    };
+
+let teamCount = { ghosts: 0, hunters: 0 };
+const MAX_DIFF = 1;
+
+function chooseBalancedTeam(){
+  const diff = teamCount.ghosts - teamCount.hunters;
+  let chosen;
+  if (Math.abs(diff) >= MAX_DIFF){
+    chosen = diff > 0 ? TEAMS[1] : TEAMS[0];
+  } else {
+    chosen = TEAMS[Math.floor(Math.random() * TEAMS.length)];
   }
-  if(next){ next.onclick=()=>{ i++; render(); } }
+  if (chosen.id==='ghosts') teamCount.ghosts++; else teamCount.hunters++;
+  return chosen;
 }
-render();
+
+const scan = document.getElementById('scanArea');
+const result = document.getElementById('result');
+
+scan.addEventListener('click', ()=>{
+  if(scan.classList.contains('scanning')) return;
+  result.textContent = 'Сканируем ауру...';
+  result.className = '';
+  scan.classList.add('scanning');
+
+  setTimeout(()=>{
+    const team = chooseBalancedTeam();
+    localStorage.setItem('hn_team', JSON.stringify(team));
+    scan.classList.remove('scanning');
+    result.textContent = team.name === 'ПРИЗРАКИ' ? 
+      '👻 Ваша энергия принадлежит ПРИЗРАКАМ!' :
+      '🔥 ОХОТНИКИ приняли вас в свои ряды!';
+    result.classList.add(team.color,'fadeIn');
+  }, 2500);
+});
 </script>
 </body>
 </html>
