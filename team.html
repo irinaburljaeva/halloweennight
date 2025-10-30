@@ -28,7 +28,7 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
   box-shadow:0 10px 40px rgba(0,0,0,.35);
 }
 
-/* Сканер */
+/* Сенсор */
 .scan-wrap{position:relative; width:min(80vw,420px); height:min(80vw,420px); margin:10px auto 10px}
 .scan-circle{
   position:absolute; inset:0; border-radius:50%;
@@ -38,18 +38,12 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
   border:1px solid rgba(255,255,255,.05);
   transition: box-shadow .2s ease, outline-color .2s ease, transform .08s ease;
 }
-.scan-circle:hover{outline:2px solid rgba(255,183,3,.25); outline-offset:3px}
-
-/* усиленное свечение при касании */
 .scan-circle.touching{
-  box-shadow:
-    inset 0 0 60px rgba(0,0,0,.65),
-    0 0 70px rgba(255,183,3,.25),
-    0 0 22px rgba(255,183,3,.25);
+  box-shadow: inset 0 0 60px rgba(0,0,0,.65),
+              0 0 70px rgba(255,183,3,.25),
+              0 0 22px rgba(255,183,3,.25);
   transform: scale(1.005);
 }
-
-/* круговая «рябь» при касании */
 .ripple{
   position:absolute; border-radius:50%; pointer-events:none;
   border:2px solid rgba(255,183,3,.35);
@@ -62,20 +56,6 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
   to{opacity:0; transform:translate(-50%,-50%) scale(16)}
 }
 
-/* Пульс и бегущая линия */
-.pulse::before{
-  content:""; position:absolute; inset:12%; border-radius:50%;
-  border:2px solid rgba(255,255,255,.08); animation:pulse 2.2s ease-out infinite;
-}
-.pulse::after{
-  content:""; position:absolute; left:0; right:0; height:3px; top:-3px;
-  background:linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
-  animation:scanline 2.4s linear infinite;
-  opacity:.4;
-}
-@keyframes pulse{0%{transform:scale(.9); opacity:.7} 70%{transform:scale(1.05); opacity:.15} 100%{opacity:0}}
-@keyframes scanline{0%{top:-3px} 100%{top:calc(100% + 3px)}}
-
 .hand{ width:90px; height:90px; border-radius:50%;
   background: radial-gradient(circle at 35% 35%, #ffd166, #ff9e00);
   box-shadow:0 0 18px rgba(255,158,0,.45);
@@ -83,12 +63,11 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 }
 .hand:after{ content:"👇"; font-size:38px; position:absolute; inset:0; display:grid; place-items:center; filter:drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
 
-/* Спиннер */
 .spinner{ position:absolute; width:92%; height:92%; border-radius:50%; inset:4%;
   border:3px dashed rgba(255,255,255,.18); animation:spin 1.5s linear infinite; display:none }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Прогресс и фазы */
+/* Прогресс */
 .progress{width:80%; height:10px; margin:8px auto 0; background:#0f1422; border-radius:8px; overflow:hidden; display:none}
 .progress>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#ffb703,#ffd166); border-radius:8px; transition:width .18s}
 .phase{min-height:24px; color:#adb3c4; margin-top:6px; font-size:14px; display:none}
@@ -115,7 +94,7 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 
     <div class="panel">
       <div class="scan-wrap">
-        <div id="circle" class="scan-circle pulse" aria-label="Сенсор активации">
+        <div id="circle" class="scan-circle" aria-label="Сенсор активации">
           <div class="hand" id="hand"></div>
           <div class="spinner" id="spinner"></div>
         </div>
@@ -137,24 +116,22 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 const LS_KEY_TEAM='hn_team';
 const LS_KEY_COUNTS='hn_counts_v1';
 
-const circle = document.getElementById('circle');
-const spinner= document.getElementById('spinner');
-const hand   = document.getElementById('hand');
-const result = document.getElementById('result');
-const goBtn  = document.getElementById('goBtn');
-const again  = document.getElementById('again');
-const progress = document.getElementById('progress');
-const bar = document.getElementById('bar');
-const phase = document.getElementById('phase');
-const lead = document.getElementById('lead');
-const title = document.getElementById('title');
+const circle=document.getElementById('circle');
+const spinner=document.getElementById('spinner');
+const hand=document.getElementById('hand');
+const result=document.getElementById('result');
+const goBtn=document.getElementById('goBtn');
+const again=document.getElementById('again');
+const progress=document.getElementById('progress');
+const bar=document.getElementById('bar');
+const phase=document.getElementById('phase');
+const lead=document.getElementById('lead');
 
-const classFor = t => t==='ghosts' ? 'ghost' : 'hunter';
-const story = t => t==='ghosts' ? '👻 Ваша энергия принадлежит ПРИЗРАКАМ!' : '🏹 Вас выбрали ОХОТНИКИ!';
+const classFor=t=>t==='ghosts'?'ghost':'hunter';
+const story=t=>t==='ghosts'?'👻 Ваша энергия принадлежит ПРИЗРАКАМ!':'🏹 Вас выбрали ОХОТНИКИ!';
 
 function getCounts(){
-  try{
-    const raw=localStorage.getItem(LS_KEY_COUNTS);
+  try{const raw=localStorage.getItem(LS_KEY_COUNTS);
     if(!raw)return{ghosts:0,hunters:0};
     const o=JSON.parse(raw);
     return{ghosts:o.ghosts|0,hunters:o.hunters|0};
@@ -174,13 +151,22 @@ function chooseBalancedTeam(){
   setCounts(c);return t;
 }
 
-function lockUI(l){circle.style.pointerEvents=l?'none':'auto'}
+function vibrate(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch{}}
+
+function spawnRipple(x,y){
+  const r=document.createElement('span');
+  r.className='ripple';
+  const rect=circle.getBoundingClientRect();
+  const cx=x-rect.left, cy=y-rect.top;
+  r.style.left=cx+'px'; r.style.top=cy+'px';
+  circle.appendChild(r);
+  r.addEventListener('animationend',()=>r.remove());
+}
 
 function animatePhases(totalMs){
   const steps=['Сканирую ауру…','Расшифровываю символы…','Сравниваю энергетический отпечаток…',`Совпадение с энергополем — ${60+Math.floor(Math.random()*35)}%`];
   let i=0,elapsed=0;phase.style.display='block';progress.style.display='block';bar.style.width='0%';
-  const tick=120;
-  const timer=setInterval(()=>{
+  const tick=120;const timer=setInterval(()=>{
     elapsed+=tick;
     const pct=Math.min(100,Math.floor((elapsed/totalMs)*100));
     bar.style.width=pct+'%';
@@ -190,88 +176,47 @@ function animatePhases(totalMs){
   },tick);
 }
 
-let scanning=false;
-
-// вибрация с защитой от ошибок
-function vibrate(pattern){
-  try{
-    if(navigator.vibrate) navigator.vibrate(pattern);
-  }catch(e){}
-}
-
-// визуальная «рябь» в точке касания
-function spawnRipple(x,y){
-  const r=document.createElement('span');
-  r.className='ripple';
-  // позиционируем относительно центра круга
-  const rect=circle.getBoundingClientRect();
-  const cx=x-rect.left, cy=y-rect.top;
-  r.style.left=cx+'px'; r.style.top=cy+'px';
-  circle.appendChild(r);
-  r.addEventListener('animationend',()=>r.remove());
-}
-
 function startScan(){
-  scanning=true;
-  result.style.display='none';
-  goBtn.style.display='none';
-  again.style.display='none';
-  hand.style.display='none';
-
-  spinner.style.display='block';
+  result.style.display='none'; goBtn.style.display='none'; again.style.display='none';
+  hand.style.display='none'; spinner.style.display='block';
+  lead.textContent='Идёт сканирование…';
   animatePhases(2600+Math.random()*900);
-  lockUI(true);
-
   const dur=2700+Math.random()*900;
   setTimeout(()=>{
     const team=chooseBalancedTeam();
     localStorage.setItem(LS_KEY_TEAM,team);
-
-    spinner.style.display='none';
-    phase.style.display='none';
-    progress.style.display='none';
-
+    spinner.style.display='none'; phase.style.display='none'; progress.style.display='none';
     result.className='result '+classFor(team);
     result.textContent=story(team);
     result.style.display='block';
-
     again.style.display='inline-block';
     goBtn.href=`host.html?team=${team}`;
     goBtn.style.display='inline-block';
-
-    vibrate(80); // тактильная отдача при результате
     lead.textContent='Дом произнёс свой вердикт…';
-    lockUI(false);
-    scanning=false;
+    vibrate(80);
   },dur);
 }
 
-// обработка касаний/кликов по сенсору
-circle.addEventListener('pointerdown', (e)=>{
+circle.addEventListener('click',(e)=>{
+  if(spinner.style.display==='block')return;
   circle.classList.add('touching');
-  spawnRipple(e.clientX, e.clientY);
-  vibrate(25); // лёгкий отклик сразу при касании
+  spawnRipple(e.clientX,e.clientY);
+  vibrate(30);
+  setTimeout(()=>circle.classList.remove('touching'),250);
+  startScan();
 });
 
-circle.addEventListener('pointerup', ()=>{
-  circle.classList.remove('touching');
-});
-
-circle.addEventListener('pointerleave', ()=>{
-  circle.classList.remove('touching');
-});
-
-circle.addEventListener('click', ()=>{
-  if(scanning) return;
-  if(!progress.style.display||progress.style.display==='none'){
-    lead.textContent='Идёт сканирование…';
-    startScan();
-  }
-});
-
-again.addEventListener('click', ()=>{
-  lead.textContent='Разместите руку на сенсоре…';
-  progress.style.display='none'; phase.style.display='none'; bar.style.width='0%';
+again.addEventListener('click',()=>{
+  // сброс интерфейса
+  result.style.display='none';
+  goBtn.style.display='none';
+  again.style.display='none';
+  spinner.style.display='none';
+  phase.style.display='none';
+  progress.style.display='none';
+  bar.style.width='0%';
+  hand.style.display='block';
+  lead.textContent='Разместите палец на сенсоре…';
 });
 </script>
 </body>
