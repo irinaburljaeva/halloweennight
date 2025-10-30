@@ -522,6 +522,25 @@
       else if(p===3){ show('room4'); }
       else if(p>=4){ show('final'); }
     })();
+
+    // --- управление заголовком и кнопкой старта ---
+  const startBtn = document.getElementById('startBtn');
+  const titleEl = document.querySelector('.title');
+
+  // показываем заголовок при сбросе
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    titleEl.classList.remove('hidden');
+  });
+
+  // прячем заголовок при входе в дом
+  startBtn.addEventListener('click', () => {
+    titleEl.classList.add('hidden');
+    startBtn.classList.add('hidden');
+    buildR1();
+    show('room1');
+    save('hn_progress', 0);
+  });
+</script>
   </script>
 </body>
 </html>
