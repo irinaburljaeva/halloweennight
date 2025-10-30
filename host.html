@@ -4,407 +4,524 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Таинственный дом — Командный квест</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+
   <style>
+    /* ====== THEME ====== */
     :root{
-      --bg:#0f1115; --card:#1a1f27; --muted:#9aa4b2; --ink:#e8edf4; --accent:#ffb703;
-      --bad:#ff5c7a; --good:#32d74b;
+      --bg:#0e1116;
+      --card:#171c23;
+      --ink:#e9eef6;
+      --muted:#9aa5b4;
+      --line:#242c37;
+      --accent:#ffb703;
+      --accent-ink:#1a1200;
+      --ok:#32d74b;
+      --bad:#ff5c7a;
+      --pill-ghost:#5a3d7a;
+      --pill-hunter:#2f6a9a;
     }
     *{box-sizing:border-box}
     html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    .wrap{max-width:960px;margin:0 auto;padding:16px 14px 80px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+    img{display:block;max-width:100%}
+    .wrap{max-width:980px;margin:0 auto;padding:16px 14px 80px}
+
+    /* ====== HEADER ====== */
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
     .title{font-weight:800;font-size:22px;line-height:1.2}
-    .team-pill{padding:8px 14px;border-radius:999px;background:#251d27;border:1px solid #3a2b3e;font-weight:800}
-    .team-ghost{box-shadow:0 0 0 2px #5a3d7a inset}
-    .team-hunter{box-shadow:0 0 0 2px #2f6a9a inset}
-    .btn{appearance:none;border:none;padding:10px 16px;border-radius:12px;font-weight:700;cursor:pointer}
-    .btn--start{background:var(--accent);color:#1a1200}
-    .btn--reset{background:#2a2f38;color:var(--ink)}
-    .lang{background:#1e242d;border:1px solid #2b323c;padding:8px 14px;border-radius:8px;color:var(--ink);cursor:pointer;font-size:14px}
-    .card{background:var(--card);border:1px solid #242a34;border-radius:18px;margin:14px 0;overflow:hidden}
-    .card-header img{width:100%;height:220px;object-fit:cover;background:#0b0d11}
-    .card-body{padding:18px}
-    h2{margin:0 0 14px 0;font-size:26px}
-    p{margin:0 0 12px 0}
-    ul{margin:12px 0 16px 22px}
-    .hint{color:var(--muted);font-size:14px;margin-top:8px}
+    .right{display:flex;align-items:center;gap:8px}
+    .lang{background:#1e2430;border:1px solid #2a3240;color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .team-pill{padding:8px 14px;border-radius:999px;background:#201c23;border:1px solid #332b39;font-weight:800}
+    .team-ghost{box-shadow:0 0 0 2px var(--pill-ghost) inset}
+    .team-hunter{box-shadow:0 0 0 2px var(--pill-hunter) inset}
     .hidden{display:none!important}
-    .success{border:1px solid rgba(50,215,75,.35);box-shadow:0 0 0 2px rgba(50,215,75,.12) inset}
-    .fail{border:1px solid rgba(255,92,122,.3);box-shadow:0 0 0 2px rgba(255,92,122,.1) inset}
-    .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #303845;background:#12161c;color:var(--ink);font-size:16px}
-    .row{display:flex;gap:12px;flex-wrap:wrap}
+
+    /* ====== CARDS ====== */
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;margin:14px 0;overflow:hidden}
+    .card-header{background:#0c0f14}
+    .card-header img{width:100%;height:240px;object-fit:cover}
+    .card-body{padding:18px}
+    h1,h2{margin:0 0 14px 0}
+    h2{font-size:26px}
+    p{margin:0 0 12px 0}
+    ul{margin:10px 0 14px 22px}
     .center{text-align:center}
-    a.btn-link{display:inline-block;text-decoration:none}
+
+    /* ====== CONTROLS ====== */
+    .btn{appearance:none;border:none;padding:12px 16px;border-radius:12px;font-weight:800;cursor:pointer}
+    .btn--start{background:var(--accent);color:var(--accent-ink)}
+    .btn--ghost{background:#251d2d;border:1px solid #3a2b45}
+    .btn--muted{background:#242b35;color:var(--ink)}
+    .btn-link{display:inline-block;text-decoration:none}
+    .input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #2c3441;background:#0f141b;color:var(--ink);font-size:16px}
+    .hint{color:var(--muted);font-size:14px;margin-top:8px}
+    .success{border:1px solid rgba(50,215,75,.35);box-shadow:0 0 0 2px rgba(50,215,75,.12) inset}
+    .fail{border:1px solid rgba(255,92,122,.35);box-shadow:0 0 0 2px rgba(255,92,122,.12) inset}
+
+    /* ====== PROGRESS / FOOTER ====== */
+    .progress{margin-top:10px;color:var(--muted);font-size:14px}
+    .space{height:4px}
+
+    /* Responsive tune */
+    @media (min-width:760px){
+      .card-header img{height:300px}
+      h2{font-size:28px}
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <header>
-      <div class="title" data-text="title">Таинственный дом — Командный квест</div>
-      <div style="display:flex;align-items:center;gap:8px">
+      <div class="title" id="t-app">Таинственный дом — Командный квест</div>
+      <div class="right">
         <div id="teamPill" class="team-pill hidden"></div>
-        <select id="langSelect" class="lang">
+        <select id="langSelect" class="lang" aria-label="language">
           <option value="ru">🇷🇺 Рус</option>
           <option value="es">🇪🇸 Esp</option>
         </select>
-        <button id="startBtn" class="btn btn--start" data-text="start">Старт</button>
-        <button id="resetBtn" class="btn btn--reset" data-text="reset">Сброс</button>
+        <button id="resetBtn" class="btn btn--muted" type="button">Начать сначала</button>
       </div>
     </header>
 
-    <!-- Вступление -->
+    <!-- ====== INTRO ====== -->
     <section id="intro" class="card">
-      <div class="card-header"><img src="intro.png" alt="" /></div>
-      <div class="card-body">
-        <h2 data-text="introTitle">Дом на холме</h2>
-        <p data-text="introText">
+      <div class="card-header">
+        <!-- твоя обложка -->
+        <img src="intro.png" alt="Дом на холме">
+      </div>
+      <div class="card-body center">
+        <h2 id="t-intro-title">Дом на холме</h2>
+        <p id="t-intro-text">
           Этот дом стоит на холме уже сотни лет. Никто не помнит, кто его построил.
           Но каждый Хэллоуин его окна вспыхивают огнём, а двери открываются — только тем,
           кто осмелится войти. Дом распределит вас на команды и впустит в комнаты…
           Сумеете ли вы открыть Последнюю Дверь?
         </p>
+        <div class="space"></div>
+        <button id="startBtn" class="btn btn--start" type="button">Войти в дом</button>
       </div>
     </section>
 
-    <!-- Библиотека -->
+    <!-- ====== ROOM 1: БИБЛИОТЕКА ====== -->
     <section id="room1" class="card hidden">
-      <div class="card-header"><img src="library.png" alt="" /></div>
+      <div class="card-header">
+        <img src="library.png" alt="Библиотека">
+      </div>
       <div class="card-body">
-        <h2 data-text="r1Title">Библиотека</h2>
-        <p data-text="r1Text">
+        <h2 id="t-r1-title">Библиотека</h2>
+        <p id="t-r1-lead">
           Полки до потолка, карточный каталог и скрип перьевой ручки. На столе записка:
           «Ключ — в первых буквах найденного».
         </p>
-        <div id="r1-list-block">
-          <p data-text="r1Find">Найдите и соберите перед собой эти 5 предметов (в любом порядке):</p>
+
+        <!-- Блок «соберите предметы» -->
+        <div id="r1-collect-block">
+          <p id="t-r1-collect">Найдите и соберите перед собой эти 5 предметов (в любом порядке):</p>
           <ul id="r1-list"></ul>
-          <button id="r1-got" class="btn btn--start" data-text="collected">Предметы собраны</button>
+          <button id="r1-got" class="btn btn--start" type="button">Предметы собраны</button>
         </div>
+
+        <!-- Блок «введите пароль» -->
         <div id="r1-pass-block" class="hidden">
-          <p data-text="r1Hint">Сложите первые буквы предметов, чтобы получить пароль к следующей комнате.</p>
-          <input id="r1-input" class="input" placeholder="Введите пароль" />
-          <button id="r1-check" class="btn btn--start" data-text="check">Проверить</button>
+          <p id="t-r1-pass-hint">Сложите первые буквы предметов, чтобы получить пароль к следующей комнате.</p>
+          <input id="r1-input" class="input" placeholder="Введите пароль">
+          <div class="space"></div>
+          <button id="r1-check" class="btn btn--start" type="button">Проверить</button>
           <div id="r1-msg" class="hint"></div>
         </div>
+
+        <div class="progress" id="t-progress-1">Комната 1 из 4</div>
       </div>
     </section>
 
-    <!-- Лаборатория алхимика -->
+    <!-- ====== ROOM 2: ЛАБОРАТОРИЯ АЛХИМИКА ====== -->
     <section id="room2" class="card hidden">
-      <div class="card-header"><img src="alchemy.png" alt="" /></div>
+      <div class="card-header">
+        <img src="alchemy.png" alt="Лаборатория алхимика">
+      </div>
       <div class="card-body">
-        <h2 data-text="r2Title">Лаборатория алхимика — «Осеннее тепло»</h2>
-        <p data-text="r2Text">
+        <h2 id="t-r2-title">Лаборатория алхимика — «Осеннее тепло»</h2>
+        <p id="t-r2-lead">
           Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления.
           Когда ведущая попробует и одобрит — подтвердите.
         </p>
-        <ul>
-          <li data-text="r2i1">Кружка горячего чая.</li>
-          <li data-text="r2i2">Добавьте горсть ягод или ложку варенья.</li>
-          <li data-text="r2i3">Размешайте чайную ложку мёда.</li>
-          <li data-text="r2i4">Щепотка корицы или имбиря.</li>
-          <li data-text="r2i5">По желанию — немного молока.</li>
+
+        <ul id="t-r2-steps">
+          <li>Кружка горячего чая.</li>
+          <li>Добавьте горсть ягод или ложку варенья.</li>
+          <li>Размешайте чайную ложку мёда.</li>
+          <li>Щепотка корицы или имбиря.</li>
+          <li>По желанию — немного молока.</li>
         </ul>
-        <button id="r2-confirm" class="btn btn--start" data-text="leaderConfirms">Ведущая подтверждает</button>
+
+        <button id="r2-confirm" class="btn btn--start" type="button">Ведущая подтверждает</button>
         <div id="r2-msg" class="hint"></div>
+        <div class="progress" id="t-progress-2">Комната 2 из 4</div>
       </div>
     </section>
 
-    <!-- Зал зеркал -->
+    <!-- ====== ROOM 3: ЗАЛ ЗЕРКАЛ ====== -->
     <section id="room3" class="card hidden">
-      <div class="card-header"><img src="mirrors.png" alt="" /></div>
+      <div class="card-header">
+        <img src="mirrors.png" alt="Зал зеркал">
+      </div>
       <div class="card-body">
-        <h2 data-text="r3Title">Зал зеркал</h2>
-        <p data-text="r3Text">
-          Отражения множатся, комната шепчет: «Повторяй и добавляй».<br>
+        <h2 id="t-r3-title">Зал зеркал</h2>
+        <p id="t-r3-lead">
+          Отражения множатся, комната шепчет: «Повторяй и добавляй».
           Первый игрок показывает короткое движение. Следующий игрок повторяет его и добавляет своё.
-          Продолжайте, пока все участники команды не покажут свой жест.  
+          Продолжайте, пока все участники команды не покажут свой жест.
           Чтобы найти выход, покажите ведущей всю цепочку движений синхронно.
         </p>
-        <button id="r3-confirm" class="btn btn--start" data-text="leaderConfirms">Ведущая подтверждает</button>
+
+        <button id="r3-confirm" class="btn btn--start" type="button">Ведущая подтверждает</button>
         <div id="r3-msg" class="hint"></div>
+        <div class="progress" id="t-progress-3">Комната 3 из 4</div>
       </div>
     </section>
 
-    <!-- Последняя дверь -->
+    <!-- ====== ROOM 4: ПОСЛЕДНЯЯ ДВЕРЬ ====== -->
     <section id="room4" class="card hidden">
-      <div class="card-header"><img src="door.png" alt="" /></div>
+      <div class="card-header">
+        <img src="door.png" alt="Последняя дверь">
+      </div>
       <div class="card-body">
-        <h2 data-text="r4Title">Последняя дверь</h2>
-        <p data-text="r4Text">
+        <h2 id="t-r4-title">Последняя дверь</h2>
+        <p id="t-r4-lead">
           Ветер стихает. Перед вами высокая дверь, украшенная древними символами.
           На каждом из пяти замков — своя загадка. Разгадайте все, чтобы дом отпустил вас на свободу.
         </p>
 
-        <div class="riddle"><p data-text="q1">1) Оно идёт вперёд, но не делает ни шага.</p><input class="input" data-answers="время|tiempo"></div>
-        <div class="riddle"><p data-text="q2">2) Без языка, а говорит, без крыльев, а летает.</p><input class="input" data-answers="эхо|eco"></div>
-        <div class="riddle"><p data-text="q3">3) Сидит дед, во сто шуб одет. Кто его раздевает — тот слёзы проливает.</p><input class="input" data-answers="лук|cebolla"></div>
-        <div class="riddle"><p data-text="q4">4) Что можно увидеть с закрытыми глазами?</p><input class="input" data-answers="сон|sueño|sueno"></div>
-        <div class="riddle"><p data-text="q5">5) Без рук, без ног, а ворота открывает.</p><input class="input" data-answers="ветер|viento"></div>
+        <!-- старые загадки + испанские варианты ответов -->
+        <div class="riddle">
+          <p id="t-r4-q1">1) Оно идёт вперёд, но не делает ни шага.</p>
+          <input class="input" data-answers="время|tiempo">
+        </div>
+        <div class="riddle">
+          <p id="t-r4-q2">2) Без языка, а говорит; без крыльев, а летает.</p>
+          <input class="input" data-answers="эхо|eco">
+        </div>
+        <div class="riddle">
+          <p id="t-r4-q3">3) Сидит дед, во сто шуб одет. Кто его раздевает — тот слёзы проливает.</p>
+          <input class="input" data-answers="лук|cebolla">
+        </div>
+        <div class="riddle">
+          <p id="t-r4-q4">4) Что можно увидеть с закрытыми глазами?</p>
+          <input class="input" data-answers="сон|sueño|sueno">
+        </div>
+        <div class="riddle">
+          <p id="t-r4-q5">5) Без рук, без ног, а ворота открывает.</p>
+          <input class="input" data-answers="ветер|viento">
+        </div>
 
-        <button id="r4-check" class="btn btn--start" data-text="check">Проверить ответы</button>
+        <div class="space"></div>
+        <button id="r4-check" class="btn btn--start" type="button">Проверить ответы</button>
         <div id="r4-msg" class="hint"></div>
+        <div class="progress" id="t-progress-4">Комната 4 из 4</div>
       </div>
     </section>
 
-    <!-- Финал -->
+    <!-- ====== FINAL ====== -->
     <section id="final" class="card hidden">
-      <div class="card-header"><img src="door.png" alt="" /></div>
+      <div class="card-header">
+        <img src="door.png" alt="Финал">
+      </div>
       <div class="card-body center">
-        <h2 data-text="finalTitle">Дверь распахнулась!</h2>
-        <p data-text="finalText">Дом принял вашу смелость и смекалку. Отличная работа, команда!</p>
+        <h2 id="t-final-title">Дверь распахнулась!</h2>
+        <p id="t-final-lead">Дом принял вашу смелость и смекалку. Отличная работа, команда!</p>
         <p id="finalTeam" class="hint"></p>
-        <a href="/halloweennight/" class="btn btn-link btn--start" data-text="back">Вернуться в меню</a>
+        <a href="/halloweennight/" class="btn btn-link btn--start" id="t-final-menu">Вернуться в меню</a>
       </div>
     </section>
   </div>
 
   <script>
-    // ===== helpers =====
-    const $=s=>document.querySelector(s);
-    const $$=s=>Array.from(document.querySelectorAll(s));
-    const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
-    const load=(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}};
+    // ====== HELPERS ======
+    const $  = s => document.querySelector(s);
+    const $$ = s => Array.from(document.querySelectorAll(s));
+    const save = (k,v)=>localStorage.setItem(k, JSON.stringify(v));
+    const load = (k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}};
     const norm = s => (s||'').toLowerCase().replace('ё','е').trim();
 
-    // ===== i18n =====
-    const LKEY='hn_lang';
-    function getLang(){
-      const q = new URLSearchParams(location.search).get('lang');
-      if(q){ localStorage.setItem(LKEY,q); return q; }
-      return localStorage.getItem(LKEY) || 'ru';
-    }
-    let LANG = getLang();
-
-    const i18n = {
-      ru:{
-        title:'Таинственный дом — Командный квест',
-        start:'Старт', reset:'Сброс',
-        introTitle:'Дом на холме',
-        introText:'Этот дом стоит на холме уже сотни лет. Никто не помнит, кто его построил. Но каждый Хэллоуин его окна вспыхивают огнём, а двери открываются — только тем, кто осмелится войти. Дом распределит вас на команды и впустит в комнаты… Сумеете ли вы открыть Последнюю Дверь?',
-        r1Title:'Библиотека',
-        r1Text:'Полки до потолка, карточный каталог и скрип перьевой ручки. На столе записка: «Ключ — в первых буквах найденного».',
-        r1Find:'Найдите и соберите перед собой эти 5 предметов (в любом порядке):',
-        collected:'Предметы собраны', r1Hint:'Сложите первые буквы предметов, чтобы получить пароль к следующей комнате.',
-        check:'Проверить',
-        r2Title:'Лаборатория алхимика — «Осеннее тепло»',
-        r2Text:'Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления. Когда ведущая попробует и одобрит — подтвердите.',
-        r2i1:'Кружка горячего чая.', r2i2:'Добавьте горсть ягод или ложку варенья.', r2i3:'Размешайте чайную ложку мёда.',
-        r2i4:'Щепотка корицы или имбиря.', r2i5:'По желанию — немного молока.',
-        leaderConfirms:'Ведущая подтверждает',
-        r3Title:'Зал зеркал',
-        r3Text:'Отражения множатся, комната шепчет: «Повторяй и добавляй». Первый игрок показывает короткое движение. Следующий игрок повторяет его и добавляет своё. Продолжайте, пока все участники команды не покажут свой жест. Чтобы найти выход, покажите ведущей всю цепочку движений синхронно.',
-        r4Title:'Последняя дверь',
-        r4Text:'Ветер стихает. Перед вами высокая дверь, украшенная древними символами. На каждом из пяти замков — своя загадка. Разгадайте все, чтобы дом отпустил вас на свободу.',
-        q1:'1) Оно идёт вперёд, но не делает ни шага.',
-        q2:'2) Без языка, а говорит, без крыльев, а летает.',
-        q3:'3) Сидит дед, во сто шуб одет. Кто его раздевает — тот слёзы проливает.',
-        q4:'4) Что можно увидеть с закрытыми глазами?',
-        q5:'5) Без рук, без ног, а ворота открывает.',
-        finalTitle:'Дверь распахнулась!',
-        finalText:'Дом принял вашу смелость и смекалку. Отличная работа, команда!',
-        back:'Вернуться в меню'
-      },
-      es:{
-        title:'La Casa Misteriosa — Misión en equipos',
-        start:'Comenzar', reset:'Reiniciar',
-        introTitle:'La casa en la colina',
-        introText:'Esta casa lleva siglos en la colina. Nadie recuerda quién la construyó. Cada Halloween, sus ventanas arden y las puertas se abren para quienes se atreven a entrar. La casa os dividirá en equipos y os dejará pasar a sus salas… ¿Podréis abrir la Última Puerta?',
-        r1Title:'Biblioteca',
-        r1Text:'Estanterías hasta el techo y el crujido de una pluma. En la mesa: «La clave está en las primeras letras de lo encontrado».',
-        r1Find:'Encontrad y poned delante estos 5 objetos (en cualquier orden):',
-        collected:'Objetos reunidos', r1Hint:'Tomad las primeras letras de los objetos para obtener la contraseña de la siguiente sala.',
-        check:'Verificar',
-        r2Title:'Laboratorio del alquimista — «Calor de Otoño»',
-        r2Text:'Brillan los frascos; huele a polvos y hierbas. En la pared aparece una receta: la casa quiere que la preparéis juntos. Cuando la anfitriona lo pruebe y lo apruebe, confirmad.',
-        r2i1:'Una taza de té caliente.', r2i2:'Añadid un puñado de bayas o una cucharada de mermelada.',
-        r2i3:'Disolved una cucharadita de miel.', r2i4:'Una pizca de canela o jengibre.', r2i5:'Opcional: un poco de leche.',
-        leaderConfirms:'Confirma la anfitriona',
-        r3Title:'Sala de los Espejos',
-        r3Text:'Los reflejos se multiplican: «Repite y añade». El primero muestra un movimiento corto; el siguiente lo repite y añade el suyo. Seguid hasta que todos participen. Para salir, mostrad a la anfitriona toda la secuencia sincronizada.',
-        r4Title:'Puerta final',
-        r4Text:'El viento se calma. Una puerta alta con símbolos antiguos. Cada una de sus cinco cerraduras tiene un acertijo. Abridlas todas para salir.',
-        q1:'1) Avanza hacia adelante pero no da ningún paso.',
-        q2:'2) Sin lengua habla, sin alas vuela.',
-        q3:'3) Sentado está, con cien abrigos; quien lo desnuda derrama lágrimas.',
-        q4:'4) ¿Qué puedes ver con los ojos cerrados?',
-        q5:'5) Sin manos ni pies, abre las puertas.',
-        finalTitle:'¡La puerta se abrió!',
-        finalText:'La casa aceptó vuestro valor e ingenio. ¡Gran trabajo, equipo!',
-        back:'Volver al menú'
-      }
-    };
-
-    function applyI18n(){
-      $('#langSelect').value = LANG;
-      $$('[data-text]').forEach(el=>{
-        const key=el.getAttribute('data-text');
-        if(i18n[LANG] && i18n[LANG][key]) el.textContent = i18n[LANG][key];
-      });
-      // placeholders
-      const r1input = $('#r1-input'); if(r1input){ r1input.placeholder = LANG==='es'?'Introduce la contraseña':'Введите пароль'; }
-    }
-
-    // ===== команда из распределения (нормализация) =====
+    // ====== TEAM from team.html (query or LS) ======
     function normalizeTeam(raw){
       if(!raw) return null;
       const v=String(raw).toLowerCase();
-      if(v==='ghost'||v==='ghosts') return 'ghost';
-      if(v==='hunter'||v==='hunters') return 'hunter';
+      if(v==='ghost'||v==='ghosts'||v==='призрак'||v==='призраки') return 'ghost';
+      if(v==='hunter'||v==='hunters'||v==='охотник'||v==='охотники') return 'hunter';
       return null;
     }
     function readTeam(){
-      const fromQuery = new URLSearchParams(location.search).get('team');
-      let fromLs = null;
-      try{ fromLs = JSON.parse(localStorage.getItem('hn_team')); }catch{ fromLs = localStorage.getItem('hn_team'); }
-      const normVal = normalizeTeam(fromQuery || fromLs);
-      if(normVal) localStorage.setItem('hn_team', JSON.stringify(normVal));
-      return normVal;
+      const q = new URLSearchParams(location.search).get('team');
+      let ls;
+      try{ ls = JSON.parse(localStorage.getItem('hn_team')); } catch{ ls = localStorage.getItem('hn_team'); }
+      const n = normalizeTeam(q||ls);
+      if(n) localStorage.setItem('hn_team', JSON.stringify(n));
+      return n;
     }
     function applyTeamPill(team){
       const pill = $('#teamPill');
-      if(!team){ pill.classList.add('hidden'); pill.textContent=''; pill.classList.remove('team-ghost','team-hunter'); return; }
+      pill.classList.add('hidden'); pill.textContent=''; pill.classList.remove('team-ghost','team-hunter');
+      if(!team) return;
       pill.classList.remove('hidden');
-      if(team==='ghost'){
-        pill.textContent = (LANG==='es')?'👻 FANTASMAS':'👻 ПРИЗРАКИ';
-        pill.classList.add('team-ghost'); pill.classList.remove('team-hunter');
-      }else{
-        pill.textContent = (LANG==='es')?'🎯 CAZADORES':'🎯 ОХОТНИКИ';
-        pill.classList.add('team-hunter'); pill.classList.remove('team-ghost');
+      if(team==='ghost'){ pill.textContent='👻 ПРИЗРАКИ'; pill.classList.add('team-ghost'); }
+      else { pill.textContent='🎯 ОХОТНИКИ'; pill.classList.add('team-hunter'); }
+    }
+    const TEAM = readTeam(); applyTeamPill(TEAM);
+
+    // ====== LANGUAGE ======
+    const i18n = {
+      ru:{
+        app:'Таинственный дом — Командный квест',
+        reset:'Начать сначала',
+        introTitle:'Дом на холме',
+        introText:'Этот дом стоит на холме уже сотни лет. Никто не помнит, кто его построил. Но каждый Хэллоуин его окна вспыхивают огнём, а двери открываются — только тем, кто осмелится войти. Дом распределит вас на команды и впустит в комнаты… Сумеете ли вы открыть Последнюю Дверь?',
+        enter:'Войти в дом',
+        r1Title:'Библиотека',
+        r1Lead:'Полки до потолка, карточный каталог и скрип перьевой ручки. На столе записка: «Ключ — в первых буквах найденного».',
+        r1Collect:'Найдите и соберите перед собой эти 5 предметов (в любом порядке):',
+        r1PassHint:'Сложите первые буквы предметов, чтобы получить пароль к следующей комнате.',
+        r1Check:'Проверить',
+        r1Ok:'Верно! Дальше!',
+        r1Bad:'Не то слово. Подсказка была в первых буквах предметов.',
+        r2Title:'Лаборатория алхимика — «Осеннее тепло»',
+        r2Lead:'Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления. Когда ведущая попробует и одобрит — подтвердите.',
+        r2Steps:[
+          'Кружка горячего чая.',
+          'Добавьте горсть ягод или ложку варенья.',
+          'Размешайте чайную ложку мёда.',
+          'Щепотка корицы или имбиря.',
+          'По желанию — немного молока.'
+        ],
+        r2Accepted:'Зелье принято.',
+        r3Title:'Зал зеркал',
+        r3Lead:'Отражения множатся, комната шепчет: «Повторяй и добавляй». Первый игрок показывает короткое движение. Следующий игрок повторяет его и добавляет своё. Продолжайте, пока все участники команды не покажут свой жест. Чтобы найти выход, покажите ведущей всю цепочку движений синхронно.',
+        r3Accepted:'Отражения согласны.',
+        r4Title:'Последняя дверь',
+        r4Lead:'Ветер стихает. Перед вами высокая дверь, украшенная древними символами. На каждом из пяти замков — своя загадка. Разгадайте все, чтобы дом отпустил вас на свободу.',
+        r4Q1:'1) Оно идёт вперёд, но не делает ни шага.',
+        r4Q2:'2) Без языка, а говорит; без крыльев, а летает.',
+        r4Q3:'3) Сидит дед, во сто шуб одет. Кто его раздевает — тот слёзы проливает.',
+        r4Q4:'4) Что можно увидеть с закрытыми глазами?',
+        r4Q5:'5) Без рук, без ног, а ворота открывает.',
+        r4Check:'Проверить ответы',
+        r4Hint:'Есть ошибки. Обсудите вместе и попробуйте ещё раз.',
+        finalTitle:'Дверь распахнулась!',
+        finalLead:'Дом принял вашу смелость и смекалку. Отличная работа, команда!',
+        finalMenu:'Вернуться в меню',
+        p1:'Комната 1 из 4', p2:'Комната 2 из 4', p3:'Комната 3 из 4', p4:'Комната 4 из 4',
+        gathered:'Предметы собраны'
+      },
+      es:{
+        app:'La Casa Misteriosa — Juego en equipo',
+        reset:'Empezar de nuevo',
+        introTitle:'Casa en la colina',
+        introText:'Esta casa lleva siglos en la colina. Nadie recuerda quién la construyó. Cada Halloween sus ventanas arden y sus puertas se abren… solo para quienes se atreven a entrar. La casa os dividirá en equipos y os dejará pasar a las salas. ¿Lograréis abrir la Última Puerta?',
+        enter:'Entrar en la casa',
+        r1Title:'Biblioteca',
+        r1Lead:'Estantes hasta el techo y el crujido de una pluma. En la mesa: “La llave está en las primeras letras de lo encontrado”.',
+        r1Collect:'Buscad y reunid estos 5 objetos delante de vosotros (en cualquier orden):',
+        r1PassHint:'Juntad las primeras letras para obtener la contraseña a la siguiente sala.',
+        r1Check:'Comprobar',
+        r1Ok:'¡Correcto! ¡Adelante!',
+        r1Bad:'No es la palabra. La pista estaba en las primeras letras.',
+        r2Title:'Laboratorio del alquimista — “Calor de otoño”',
+        r2Lead:'Brillan matraces, huele a polvos y hierbas. La receta aparece en la pared; la casa espera que lo preparéis juntos. Cuando la anfitriona lo pruebe y lo apruebe — confirmad.',
+        r2Steps:[
+          'Una taza de té caliente.',
+          'Añade un puñado de bayas o una cucharada de mermelada.',
+          'Mezcla una cucharadita de miel.',
+          'Una pizca de canela o jengibre.',
+          'Opcional: un poco de leche.'
+        ],
+        r2Accepted:'La poción está aceptada.',
+        r3Title:'Sala de los espejos',
+        r3Lead:'Las imágenes se multiplican: “Repite y añade”. El primer jugador muestra un gesto corto; el siguiente lo repite y añade el suyo. Continuad hasta que todos lo hagan; mostradselo a la anfitriona sincronizados.',
+        r3Accepted:'Los reflejos están de acuerdo.',
+        r4Title:'La última puerta',
+        r4Lead:'El viento se calma. Ante vosotros una alta puerta con símbolos antiguos. Cada una de las cinco cerraduras tiene su acertijo. Resolvedlos todos.',
+        r4Q1:'1) Avanza, pero no da un solo paso.',
+        r4Q2:'2) Sin lengua habla; sin alas vuela.',
+        r4Q3:'3) Sentado con cien abrigos. Quien lo desnuda, llora.',
+        r4Q4:'4) ¿Qué puedes ver con los ojos cerrados?',
+        r4Q5:'5) Sin manos ni pies, abre la puerta.',
+        r4Check:'Comprobar respuestas',
+        r4Hint:'Hay errores. Habladlo y probad otra vez.',
+        finalTitle:'¡La puerta se ha abierto!',
+        finalLead:'La casa aceptó vuestro valor e ingenio. ¡Buen trabajo, equipo!',
+        finalMenu:'Volver al menú',
+        p1:'Sala 1 de 4', p2:'Sala 2 de 4', p3:'Sala 3 de 4', p4:'Sala 4 de 4',
+        gathered:'Objetos reunidos'
       }
-    }
-    function setFinalTeamLabel(){
-      const t = readTeam();
-      const el = $('#finalTeam');
-      if(!el) return;
-      if(t){
-        el.textContent = (LANG==='es'?'Equipo: ':'Команда: ') + (t==='ghost' ? (LANG==='es'?'FANTASMAS':'ПРИЗРАКИ') : (LANG==='es'?'CAZADORES':'ОХОТНИКИ'));
-      }else{
-        el.textContent = '';
-      }
+    };
+
+    function setLang(lang){
+      const t=i18n[lang]||i18n.ru;
+      $('#t-app').textContent=t.app;
+      $('#resetBtn').textContent=t.reset;
+      $('#t-intro-title').textContent=t.introTitle;
+      $('#t-intro-text').textContent=t.introText;
+      $('#startBtn').textContent=t.enter;
+
+      $('#t-r1-title').textContent=t.r1Title;
+      $('#t-r1-lead').textContent=t.r1Lead;
+      $('#t-r1-collect').textContent=t.r1Collect;
+      $('#t-r1-pass-hint').textContent=t.r1PassHint;
+      $('#r1-check').textContent=t.r1Check;
+      $('#t-progress-1').textContent=t.p1;
+
+      $('#t-r2-title').textContent=t.r2Title;
+      $('#t-r2-lead').textContent=t.r2Lead;
+      const list=$('#t-r2-steps'); list.innerHTML='';
+      t.r2Steps.forEach(s=>{const li=document.createElement('li');li.textContent=s;list.appendChild(li);});
+      $('#t-progress-2').textContent=t.p2;
+
+      $('#t-r3-title').textContent=t.r3Title;
+      $('#t-r3-lead').textContent=t.r3Lead;
+      $('#t-progress-3').textContent=t.p3;
+
+      $('#t-r4-title').textContent=t.r4Title;
+      $('#t-r4-lead').textContent=t.r4Lead;
+      $('#t-r4-q1').textContent=t.r4Q1;
+      $('#t-r4-q2').textContent=t.r4Q2;
+      $('#t-r4-q3').textContent=t.r4Q3;
+      $('#t-r4-q4').textContent=t.r4Q4;
+      $('#t-r4-q5').textContent=t.r4Q5;
+      $('#r4-check').textContent=t.r4Check;
+      $('#t-progress-4').textContent=t.p4;
+
+      $('#t-final-title').textContent=t.finalTitle;
+      $('#t-final-lead').textContent=t.finalLead;
+      $('#t-final-menu').textContent=t.finalMenu;
+
+      save('hn_lang',lang);
     }
 
-    const team = readTeam();
-    applyTeamPill(team);
+    const initialLang = load('hn_lang','ru');
+    $('#langSelect').value = initialLang;
+    setLang(initialLang);
+    $('#langSelect').addEventListener('change',e=>setLang(e.target.value));
 
-    // ===== библиотека: список и перемешивание =====
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-    function buildR1(){
-      const src = [
-        'Игрушка (juguete)',
-        'Носок (calcetín)',
-        'Альбом (álbum)',
-        'Галстук (corbata)',
-        'Кружка (taza)'
-      ];
-      const ul=$('#r1-list'); ul.innerHTML='';
-      shuffle(src).forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); });
-    }
-
-    function showSection(id){
-      ['intro','room1','room2','room3','room4','final'].forEach(s=>$('#'+s).classList.add('hidden'));
+    // ====== SECTION switch ======
+    function show(id){
+      ['intro','room1','room2','room3','room4','final'].forEach(x=>$('#'+x).classList.add('hidden'));
       $('#'+id).classList.remove('hidden');
       window.scrollTo({top:0,behavior:'smooth'});
     }
 
-    // ===== старт/сброс =====
-    $('#startBtn').addEventListener('click',()=>{
+    // ====== R1: предметы -> пароль ======
+    function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+    function buildR1(){
+      const items=['Игрушка','Носок','Альбом','Галстук','Кружка']; // К Н И Г А (буквы не по порядку!)
+      shuffle(items);
+      const ul=$('#r1-list'); ul.innerHTML='';
+      items.forEach(txt=>{const li=document.createElement('li');li.textContent=txt;ul.appendChild(li);});
+    }
+
+    $('#startBtn').addEventListener('click', ()=>{
       $('#startBtn').classList.add('hidden');
       buildR1();
-      showSection('room1');
+      show('room1');
+      save('hn_progress',0); // начало
     });
 
-    $('#resetBtn').addEventListener('click',()=>{
-      const del=[];
-      for(let i=0;i<localStorage.length;i++){
-        const k=localStorage.key(i);
-        if(k && k.startsWith('hn_')) del.push(k);
-      }
-      del.forEach(k=>localStorage.removeItem(k));
-      location.reload();
-    });
-
-    // Библиотека: скрыть список -> ввод пароля
-    $('#r1-got').addEventListener('click',()=>{
-      $('#r1-list-block').classList.add('hidden');
+    $('#r1-got').addEventListener('click', ()=>{
+      // скрываем список — пусть вспоминают по реальным предметам
+      $('#r1-collect-block').classList.add('hidden');
       $('#r1-pass-block').classList.remove('hidden');
       $('#r1-input').focus();
     });
 
-    $('#r1-check').addEventListener('click',()=>{
+    $('#r1-check').addEventListener('click', ()=>{
+      const lang = load('hn_lang','ru');
+      const okMsg = i18n[lang].r1Ok;
+      const badMsg = i18n[lang].r1Bad;
       const v = norm($('#r1-input').value);
       const ok = (v==='книга' || v==='libro');
       const msg=$('#r1-msg');
       if(ok){
-        msg.textContent = LANG==='es' ? '¡Correcto! Pasad a la siguiente sala.' : 'Верно! Дальше!';
-        $('#room1').classList.add('success'); save('hn_progress',1);
-        setTimeout(()=>showSection('room2'),600);
+        msg.textContent = okMsg;
+        $('#room1').classList.add('success');
+        save('hn_progress',1);
+        setTimeout(()=>show('room2'),650);
       }else{
-        msg.textContent = LANG==='es' ? 'No. Pista: primeras letras de los objetos.' : 'Не то слово. Подсказка была в первых буквах предметов.';
-        $('#room1').classList.add('fail'); setTimeout(()=>$('#room1').classList.remove('fail'),700);
+        msg.textContent = badMsg;
+        $('#room1').classList.add('fail');
+        setTimeout(()=>$('#room1').classList.remove('fail'),700);
       }
     });
 
-    // ===== долгий тап подтверждения (2 сек), без подсказок в тексте =====
+    // ====== Long-press helper (2s) ======
     function longPress(el, cb){
       if(!el) return;
-      let t; let down=false;
-      const start=()=>{ if(down) return; down=true; t=setTimeout(()=>{ cb(); down=false; },2000); };
-      const end=()=>{ if(t){clearTimeout(t); t=null;} down=false; };
-      el.addEventListener('pointerdown', start);
-      el.addEventListener('pointerup', end);
-      el.addEventListener('pointerleave', end);
-      el.addEventListener('touchstart', start, {passive:true});
-      el.addEventListener('touchend', end);
-      el.addEventListener('touchcancel', end);
+      let timer=null, down=false;
+      const start=()=>{ if(down) return; down=true; timer=setTimeout(()=>{cb(); down=false;},2000); };
+      const end=()=>{ if(timer){clearTimeout(timer); timer=null;} down=false; };
+      el.addEventListener('pointerdown',start);
+      el.addEventListener('pointerup',end);
+      el.addEventListener('pointerleave',end);
     }
-    longPress($('#r2-confirm'),()=>{ $('#r2-msg').textContent= LANG==='es' ? 'El elixir está aprobado.' : 'Зелье принято.'; $('#room2').classList.add('success'); save('hn_progress',2); setTimeout(()=>showSection('room3'),600); });
-    longPress($('#r3-confirm'),()=>{ $('#r3-msg').textContent= LANG==='es' ? 'Los espejos aceptan la secuencia.' : 'Отражения согласны.'; $('#room3').classList.add('success'); save('hn_progress',3); setTimeout(()=>showSection('room4'),600); });
 
-    // ===== финальная дверь: проверка на RU/ES =====
-    $('#r4-check').addEventListener('click',()=>{
+    longPress($('#r2-confirm'), ()=>{
+      const lang=load('hn_lang','ru');
+      $('#r2-msg').textContent=i18n[lang].r2Accepted;
+      $('#room2').classList.add('success');
+      save('hn_progress',2);
+      setTimeout(()=>show('room3'),650);
+    });
+
+    longPress($('#r3-confirm'), ()=>{
+      const lang=load('hn_lang','ru');
+      $('#r3-msg').textContent=i18n[lang].r3Accepted;
+      $('#room3').classList.add('success');
+      save('hn_progress',3);
+      setTimeout(()=>show('room4'),650);
+    });
+
+    // ====== R4: riddles check ======
+    $('#r4-check').addEventListener('click', ()=>{
+      const lang=load('hn_lang','ru');
       let ok=true;
       $$('#room4 input').forEach(inp=>{
-        const v = norm(inp.value);
-        const list = (inp.dataset.answers||'').split('|').map(s=>norm(s));
-        const good = list.includes(v);
+        const v=norm(inp.value);
+        const good=(inp.dataset.answers||'').split('|').map(s=>norm(s)).includes(v);
         if(!good){ ok=false; inp.classList.add('fail'); setTimeout(()=>inp.classList.remove('fail'),800); }
-        else { inp.classList.add('success'); setTimeout(()=>inp.classList.remove('success'),800); }
+        else{ inp.classList.add('success'); setTimeout(()=>inp.classList.remove('success'),800); }
       });
       if(ok){
         save('hn_progress',4);
-        setFinalTeamLabel();
-        showSection('final');
+        show('final');
+        const team = readTeam();
+        const label = team==='ghost' ? 'Команда: ПРИЗРАКИ' : team==='hunter' ? 'Команда: ОХОТНИКИ' : '';
+        $('#finalTeam').textContent = label;
       }else{
-        $('#r4-msg').textContent = LANG==='es' ? 'Hay errores. Pensad juntos e intentad de nuevo.' : 'Есть ошибки. Обсудите вместе и попробуйте ещё раз.';
+        $('#r4-msg').textContent = i18n[lang].r4Hint;
       }
     });
 
-    // ===== восстановление прогресса =====
+    // ====== RESET ======
+    $('#resetBtn').addEventListener('click', ()=>{
+      // чистим только прогресс/локаль, команду оставляем (её выдал распределитель)
+      ['hn_progress','hn_lang'].forEach(k=>localStorage.removeItem(k));
+      location.href = location.pathname; // сброс query ?team= не трогаем
+    });
+
+    // ====== RESTORE STATE ======
     (function restore(){
-      // язык
-      applyI18n();
-
-      const p = load('hn_progress',0);
-      if(p>0){ $('#startBtn').classList.add('hidden'); }
-      if(p===0){ showSection('intro'); }
-      else if(p===1){ buildR1(); showSection('room2'); }
-      else if(p===2){ showSection('room3'); }
-      else if(p===3){ showSection('room4'); }
-      else if(p>=4){
-        setFinalTeamLabel();
-        showSection('final');
-      }
+      // язык уже выставлен
+      // команда показана в пилюле
+      const p = load('hn_progress', -1);
+      if(p===-1){ show('intro'); return; } // новое посещение
+      // если начинали — прячем кнопку входа
+      $('#startBtn').classList.add('hidden');
+      if(p===0){ buildR1(); show('room1'); }
+      else if(p===1){ show('room2'); }
+      else if(p===2){ show('room3'); }
+      else if(p===3){ show('room4'); }
+      else if(p>=4){ show('final'); }
     })();
-
-    // ===== переключение языка =====
-    $('#langSelect').addEventListener('change',()=>{
-      LANG = $('#langSelect').value;
-      localStorage.setItem(LKEY, LANG);
-      applyTeamPill(readTeam());
-      applyI18n();
-    });
   </script>
 </body>
 </html>
