@@ -17,11 +17,13 @@ body{
 }
 .container{max-width:980px;margin:24px auto;padding:0 16px}
 
+/* язык */
 .topbar{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
 .lang{display:flex;gap:8px}
 .lang button{background:#1b2330;border:1px solid #2a3548;color:#cfe0ff;padding:8px 10px;border-radius:10px;font-weight:800;cursor:pointer}
 .lang button.active{background:#27405f;border-color:#3e5b82}
 
+/* шапка */
 .header{
   background: linear-gradient(180deg, #182131 0%, #0f141d 100%);
   border:1px solid rgba(255,255,255,.06);
@@ -43,7 +45,8 @@ hr.sep{border:none;height:1px;background:#223048;margin:16px 0}
 .btn:hover{transform:translateY(-1px)}
 .note{color:var(--muted);font-size:14px;margin-top:6px}
 
-.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+/* сетка */
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:6px}
 .card{
   background:linear-gradient(180deg,#121821 0%,#0f141d 100%);
   border:1px solid var(--stroke); border-radius:16px; overflow:hidden;
@@ -61,7 +64,7 @@ hr.sep{border:none;height:1px;background:#223048;margin:16px 0}
   display:flex; align-items:center; justify-content:center;
 }
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-.thumb .ph{opacity:.2;font-weight:800}
+.thumb .ph{opacity:.2;font-weight:800;color:#6b778f}
 
 .card .body{padding:14px 16px 18px}
 .card h3{margin:10px 0 6px; font-size:20px; line-height:1.2}
@@ -101,7 +104,7 @@ label.btn{display:inline-flex;align-items:center;gap:8px}
 </div>
 
 <script>
-/* ---------------- I18N ---------------- */
+/* ---------- I18N ---------- */
 const I18N = {
   ru: {
     title: 'Trick-or-Treat Hunt',
@@ -149,51 +152,60 @@ const I18N = {
   }
 };
 const LANG_KEY = 'hn_hunt_lang';
-let LANG = localStorage.getItem(LANG_KEY) || (navigator.language.startsWith('es')?'es':'ru');
-const $btnRU = document.getElementById('lang-ru');
-const $btnES = document.getElementById('lang-es');
-$btnRU.onclick = ()=> setLang('ru');
-$btnES.onclick = ()=> setLang('es');
-function setLang(l){
-  LANG = l; localStorage.setItem(LANG_KEY,l);
-  $btnRU.classList.toggle('active', l==='ru');
-  $btnES.classList.toggle('active', l==='es');
-  document.documentElement.lang = l;
-  document.getElementById('t-title').innerText = I18N[l].title;
-  document.getElementById('t-lead').innerText  = I18N[l].lead;
-  document.getElementById('exportBtn').innerText = I18N[l].export;
-  document.getElementById('resetBtn').innerText  = I18N[l].reset;
-  document.getElementById('t-hint').innerText   = I18N[l].hint;
-  render(); // перерисовать карточки с переводом
-}
-setLang(LANG);
+let LANG = localStorage.getItem(LANG_KEY) || (navigator.language?.startsWith('es')?'es':'ru');
 
-/* --------------- ДАННЫЕ/ХРАНИЛКА --------------- */
 const KEY = 'hn_hunt_photos_v2';
 const state = loadState();
 function loadState(){ try{ return JSON.parse(localStorage.getItem(KEY))||{} }catch(e){ return {} } }
 function saveState(){ localStorage.setItem(KEY, JSON.stringify(state)) }
 
-/* --------------- ОТРИСОВКА --------------- */
-const $grid = document.getElementById('grid');
+let $grid,$btnRU,$btnES;
+
+/* старт строго после DOMContentLoaded */
+document.addEventListener('DOMContentLoaded', ()=>{
+  $grid  = document.getElementById('grid');
+  $btnRU = document.getElementById('lang-ru');
+  $btnES = document.getElementById('lang-es');
+
+  $btnRU.onclick = ()=> setLang('ru');
+  $btnES.onclick = ()=> setLang('es');
+
+  setLang(LANG); // это и перерисует карточки
+  bindGlobalButtons();
+});
+
+/* язык + перерисовка */
+function setLang(l){
+  LANG = l; localStorage.setItem(LANG_KEY,l);
+  document.documentElement.lang = l;
+  if($btnRU && $btnES){
+    $btnRU.classList.toggle('active', l==='ru');
+    $btnES.classList.toggle('active', l==='es');
+  }
+  setText('t-title', I18N[l].title);
+  setText('t-lead',  I18N[l].lead);
+  setText('exportBtn', I18N[l].export);
+  setText('resetBtn',  I18N[l].reset);
+  setText('t-hint',   I18N[l].hint);
+  render();
+}
+function setText(id, txt){ const el=document.getElementById(id); if(el) el.textContent=txt; }
 function tasks(){ return I18N[LANG].tasks }
 
+/* отрисовка карточек */
 function render(){
+  if(!$grid) return;
   $grid.innerHTML = '';
   tasks().forEach(t=>{
     const s = state[t.id] || {};
+    const hasPhoto = Boolean(s.photo);
     const card = document.createElement('article');
     card.className = 'card task';
     card.dataset.id = t.id;
-    const badgeText = s.photo ? I18N[LANG].ready : I18N[LANG].wait;
-    const hasPhoto  = Boolean(s.photo);
     card.innerHTML = `
       <div class="top">
-        <span class="badge ${hasPhoto?'done':''}">${badgeText}</span>
-        <div class="thumb">
-          ${hasPhoto ? `<img id="th-${t.id}" src="${s.photo}" alt="">`
-                     : `<div class="ph">IMG</div>`}
-        </div>
+        <span class="badge ${hasPhoto?'done':''}">${hasPhoto?I18N[LANG].ready:I18N[LANG].wait}</span>
+        <div class="thumb">${hasPhoto?`<img id="th-${t.id}" src="${s.photo}" alt="">`:`<div class="ph">IMG</div>`}</div>
       </div>
       <div class="body">
         <h3><span class="em">${t.emoji}</span>${t.name}</h3>
@@ -210,9 +222,8 @@ function render(){
   });
   bindInputs();
 }
-render();
 
-/* --------------- ВВОД ФОТО (СЖАТИЕ + ПРЕВЬЮ) --------------- */
+/* привязки к инпутам */
 function bindInputs(){
   document.querySelectorAll('input[type=file][data-id]').forEach(inp=>{
     inp.addEventListener('change', async (e)=>{
@@ -220,24 +231,21 @@ function bindInputs(){
       const file = e.target.files && e.target.files[0];
       if(!file) return;
 
-      // мгновенное превью пока сжимается
       const objURL = URL.createObjectURL(file);
       ensureThumbImg(id).src = objURL;
 
       try{
-        const dataUrl = await compressImage(file, 1600, 0.82); // <= основное хранение
+        const dataUrl = await compressImage(file, 1600, 0.82);
         state[id] = state[id] || {};
         state[id].photo = dataUrl;
         saveState();
-
-        ensureThumbImg(id).src = dataUrl; // финальный результат
-        document.querySelector(`.task[data-id="${id}"] .badge`).classList.add('done');
-        document.querySelector(`.task[data-id="${id}"] .badge`).textContent = I18N[LANG].ready;
-      }catch(err){
-        console.error(err);
-      }finally{
+        ensureThumbImg(id).src = dataUrl;
+        const badge = document.querySelector(`.task[data-id="${id}"] .badge`);
+        badge.classList.add('done'); badge.textContent = I18N[LANG].ready;
+      }catch(err){ console.error(err) }
+      finally{
         URL.revokeObjectURL(objURL);
-        e.target.value = ''; // чтобы можно было выбрать то же фото снова
+        e.target.value = '';
       }
     });
   });
@@ -247,21 +255,17 @@ function bindInputs(){
       const id = e.currentTarget.dataset.clear;
       if(state[id]?.photo){
         delete state[id].photo; saveState();
-        const th = ensureThumbImg(id);
-        th.removeAttribute('src');
-        th.parentElement.innerHTML = '<div class="ph">IMG</div>';
+        const box = document.querySelector(`.task[data-id="${id}"] .thumb`);
+        box.innerHTML = '<div class="ph">IMG</div>';
         const badge = document.querySelector(`.task[data-id="${id}"] .badge`);
-        badge.classList.remove('done');
-        badge.textContent = I18N[LANG].wait;
+        badge.classList.remove('done'); badge.textContent = I18N[LANG].wait;
       }
     });
   });
 }
-
 function ensureThumbImg(id){
   let img = document.getElementById('th-'+id);
   if(!img){
-    // если был плейсхолдер — заменим его на <img>
     const box = document.querySelector(`.task[data-id="${id}"] .thumb`);
     box.innerHTML = `<img id="th-${id}" alt="">`;
     img = document.getElementById('th-'+id);
@@ -269,7 +273,7 @@ function ensureThumbImg(id){
   return img;
 }
 
-/* Сжатие изображения: возвращает dataURL (JPEG) */
+/* сжатие изображения */
 function compressImage(file, maxSide=1600, quality=0.82){
   return new Promise((resolve, reject)=>{
     const img = new Image();
@@ -282,27 +286,31 @@ function compressImage(file, maxSide=1600, quality=0.82){
       canvas.width = w; canvas.height = h;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
-      try{
-        const dataUrl = canvas.toDataURL('image/jpeg', quality);
-        resolve(dataUrl);
-      }catch(err){ reject(err); }
+      try{ resolve(canvas.toDataURL('image/jpeg', quality)); }
+      catch(err){ reject(err); }
     };
     img.onerror = reject;
-    // читаем как объектный URL для стабильности
     const fr = new FileReader();
-    fr.onload = () => { img.src = fr.result; };
+    fr.onload = ()=> img.src = fr.result;
     fr.onerror = reject;
     fr.readAsDataURL(file);
   });
 }
 
-/* --------------- ЭКСПОРТ В HTML-АЛЬБОМ --------------- */
-document.getElementById('exportBtn').addEventListener('click', ()=>{
+/* экспорт и сброс */
+function bindGlobalButtons(){
+  document.getElementById('exportBtn').addEventListener('click', exportAlbum);
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    if(confirm(I18N[LANG].confirmReset)){
+      localStorage.removeItem(KEY);
+      for(const k in state) delete state[k];
+      render();
+    }
+  });
+}
+function exportAlbum(){
   const now = new Date();
-  const stamp = (LANG==='es'
-    ? now.toLocaleString('es-ES')
-    : now.toLocaleString('ru-RU'));
-
+  const stamp = (LANG==='es' ? now.toLocaleString('es-ES') : now.toLocaleString('ru-RU'));
   const blocks = tasks().map(t=>{
     const photo = state[t.id]?.photo;
     return `
@@ -312,7 +320,6 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
                 : `<div style="margin-top:6px;padding:24px;border:1px dashed #bbb;border-radius:10px;color:#666">${LANG==='es'?'sin foto':'нет фото'}</div>`}
       </figure>`;
   }).join('');
-
   const html = `<!DOCTYPE html><html lang="${LANG}"><head><meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${I18N[LANG].albumTitle}</title></head>
@@ -320,29 +327,13 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
   <div style="max-width:900px;margin:24px auto;padding:0 16px">
     <div style="background:white;border-radius:16px;padding:22px 18px;border:1px solid #e6e8ef">
       <h1 style="margin:0 0 4px;font:900 28px/1.1 Montserrat">${I18N[LANG].albumTitle}</h1>
-      <div style="color:#667085;margin-bottom:14px">${I18N[LANG].exportedAt}: ${stamp}</div>
+      <div style="color:#667085;margin-bottom:14px">${(LANG==='es'?'Exportado':'Экспорт')}: ${stamp}</div>
       ${blocks}
-    </div>
-  </div></body></html>`;
-
-  downloadFile('hunt-album.html', new Blob([html], {type:'text/html'}));
-});
-function downloadFile(name, blob){
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = name;
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 0);
+    </div></div></body></html>`;
+  const url = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  const a = document.createElement('a'); a.href=url; a.download='hunt-album.html';
+  document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},0);
 }
-
-/* --------------- СБРОС --------------- */
-document.getElementById('resetBtn').addEventListener('click', ()=>{
-  if(confirm(I18N[LANG].confirmReset)){
-    localStorage.removeItem(KEY);
-    for(const k in state) delete state[k];
-    render();
-  }
-});
 </script>
 </body>
 </html>
