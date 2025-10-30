@@ -8,12 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0e0e11;
-    --panel:#17171c;
-    --accent:#ffb703;     /* жёлтый акцент */
-    --ghost:#7dd3fc;      /* Призраки */
-    --hunters:#fca5a5;    /* Охотники */
-    --muted:#8b8d97;
+    --bg:#0e0e11; --panel:#17171c; --accent:#ffb703;
+    --ghost:#7dd3fc; --hunters:#fca5a5; --muted:#8b8d97;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -23,14 +19,12 @@
     background-image:
       radial-gradient(1200px 600px at 80% -10%, #2a2a33 0%, transparent 60%),
       radial-gradient(800px 400px at 10% 0%, #1b1b22 0%, transparent 60%),
-      url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=1780&auto=format&fit=crop'); /* луна/дом */
-    background-size:cover;
-    background-attachment:fixed;
-    background-position:center top;
+      url('https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=1780&auto=format&fit=crop');
+    background-size:cover; background-attachment:fixed; background-position:center top;
   }
   header{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:16px; padding:18px 20px; background:linear-gradient(#0008,#0000);
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    padding:18px 20px; background:linear-gradient(#0008,#0000);
     position:sticky; top:0; backdrop-filter:saturate(140%) blur(6px); z-index:10;
   }
   h1{margin:0; font-size:clamp(20px,3.5vw,34px); line-height:1.1}
@@ -43,21 +37,13 @@
   .wrap{max-width:960px; margin:24px auto; padding:0 16px}
   .card{
     background:color-mix(in oklab, var(--panel) 92%, #000 8%);
-    border:1px solid #2a2a33; border-radius:16px; padding:18px;
-    box-shadow:0 10px 40px #0006;
+    border:1px solid #2a2a33; border-radius:16px; padding:18px; box-shadow:0 10px 40px #0006;
   }
   .lead{font-size:clamp(16px,2.1vw,20px); color:#ddd}
-  .teamTag{
-    font-weight:800; padding:8px 12px; border-radius:999px; border:1px solid #ffffff1a;
-    display:none;
-  }
+  .teamTag{font-weight:800; padding:8px 12px; border-radius:999px; border:1px solid #ffffff1a; display:none;}
   .teamTag.ghost{display:inline-block; background:color-mix(in oklab, var(--ghost) 25%, #000 75%); color:#e6f7ff}
   .teamTag.hunters{display:inline-block; background:color-mix(in oklab, var(--hunters) 25%, #000 75%); color:#fff2f2}
-
-  /* Оверлей команды */
-  .overlay{
-    position:fixed; inset:0; display:none; place-items:center; background:#000a; z-index:20;
-  }
+  .overlay{position:fixed; inset:0; display:none; place-items:center; background:#000a; z-index:20;}
   .overlay.show{display:grid}
   .teamSplash{
     width:min(720px,92vw); padding:24px; text-align:center; border-radius:18px;
@@ -67,9 +53,7 @@
   .teamName{font-size:clamp(28px,5vw,44px); margin:6px 0 14px}
   .teamName.ghost{color:var(--ghost)}
   .teamName.hunters{color:var(--hunters)}
-  .subtitle{color:var(--muted)}
   .grid{display:grid; gap:16px}
-  .grid.cols-2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
   .roomTitle{font-size:24px; margin:0 0 8px}
   .story{color:#d7d7e0}
   .hidden{display:none}
@@ -90,144 +74,112 @@
 <header>
   <h1>Таинственный дом — Командный квест</h1>
   <div style="display:flex;gap:8px;align-items:center">
-    <div id="teamTag" class="teamTag"></div>
-    <button class="btn" id="hardStart">Старт</button>
-    <button class="btn secondary" id="resetAll">Сброс</button>
+    <div id="teamTag" class="teamTag" aria-live="polite"></div>
+    <!-- страховка: и onclick, и addEventListener -->
+    <button class="btn" id="hardStart" type="button" onclick="startGame()">Старт</button>
+    <button class="btn secondary" id="resetAll" type="button">Сброс</button>
   </div>
 </header>
 
 <div class="wrap">
-  <!-- Интро -->
   <section id="intro" class="card">
     <p class="lead">
       В Хэллоуин электричество мигает, окна гремят — и вы находите старый дом у края парка.
-      Говорят, он пускает внутрь лишь те компании, что готовы пройти испытания… Нажмите
-      <b>«Старт»</b>, и дом сам распределит вас на команды.
+      Нажмите <b>«Старт»</b>, и дом сам распределит вас на команды.
     </p>
     <div class="footNote">Подсказок на экране не будет — всё решаем вместе вживую.</div>
   </section>
 
-  <!-- Комнаты -->
   <section id="rooms" class="hidden">
-    <!-- Комната 1 -->
     <div class="card">
       <div class="roomHeader">
         <h2 class="roomTitle">Комната 1. Прихожая: «Знак дома»</h2>
         <span id="teamBadge1" class="badge">Команда</span>
       </div>
-      <p class="story">
-        Дверь хлопает за спиной. На вешалке — старые плащи, на полке — свечи. На стене висит табличка:
-        <em>«Гость, назови слово, что начинается так же, как и сам дом»</em>.
-      </p>
-      <p class="muted">
-        Задание для реальной жизни: за 1 минуту найдите в комнате любой предмет,
-        название которого начинается на букву <b>Д</b> (как «дом»), и принесите ведущему.
-        Если предметов с «Д» нет — придумайте «домашний пароль» на букву «Д» и сообщите его хором.
-      </p>
+      <p class="story">Дверь хлопает за спиной… На стене табличка: <em>«Назови слово, что начинается
+        так же, как дом»</em>.</p>
+      <p class="muted">IRL: за 1 минуту найдите предмет на букву <b>Д</b> или придумайте «домашний пароль»
+        на «Д» и скажите его хором.</p>
       <div class="sep"></div>
-      <label class="muted">Введите ваш пароль (чтобы зафиксировать прогресс):</label>
+      <label class="muted">Введите ваш пароль (фиксирует прогресс):</label>
       <input id="ans1" type="text" placeholder="пример: ДЫМКА" />
       <div id="res1" class="footNote"></div>
     </div>
 
-    <!-- Комната 2 -->
     <div class="card">
       <div class="roomHeader">
         <h2 class="roomTitle">Комната 2. Библиотека: «Шёпот страниц»</h2>
         <span id="teamBadge2" class="badge">Команда</span>
       </div>
-      <p class="story">
-        Полки под потолок, книги пахнут осенью. Старинная записка шепчет:
-        <em>«Ключ к двери спрятан в трёх словах: месяц, лист, тень — добавь первые буквы,
-        и шёпот станет паролем…»</em>
-      </p>
-      <p class="muted">
-        IRL-часть: найдите три предмета, которые ассоциируются с осенью: <b>М</b>есяц, <b>Л</b>ист, <b>Т</b>ень.
-        Сфотографируйте их вместе (или покажите ведущему), затем сложите первые буквы в пароль (например «МЛТ»).
-      </p>
+      <p class="story">Полки под потолок… Записка: <em>«Месяц, Лист, Тень — сложи первые буквы»</em>.</p>
+      <p class="muted">IRL: найдите в комнате три ассоциации: Месяц/Луна, Лист, Тень; составьте пароль из
+        первых букв.</p>
       <div class="sep"></div>
       <label class="muted">Пароль из первых букв:</label>
       <input id="ans2" type="text" placeholder="например: МЛТ" />
       <div id="res2" class="footNote"></div>
     </div>
 
-    <!-- Комната 3 -->
     <div class="card">
       <div class="roomHeader">
         <h2 class="roomTitle">Комната 3. Музыкальная: «Эхо вальса»</h2>
         <span id="teamBadge3" class="badge">Команда</span>
       </div>
-      <p class="story">
-        На пюпитре — ноты вальса, а рядом пластинка «Autumn Leaves». На стене надпись:
-        <em>«Три такта — три шага. Сыграй телом — и дверь ответит»</em>.
-      </p>
-      <p class="muted">
-        IRL-часть: вся команда синхронно делает «три шага вальса» (лево-вперёд, право-в сторону, вместе) под
-        любой ритм, который напоёт ведущий. После — введите слово-ответ: <b>ВАЛЬС</b>.
-      </p>
+      <p class="story">На пюпитре ноты «Autumn Leaves». Надпись: <em>«Три такта — три шага»</em>.</p>
+      <p class="muted">IRL: вся команда делает три шага вальса синхронно. Ответ: <b>ВАЛЬС</b>.</p>
       <div class="sep"></div>
       <label class="muted">Слово-ответ:</label>
-      <input id="ans3" type="text" placeholder="подсказка: 5 букв" />
+      <input id="ans3" type="text" placeholder="5 букв" />
       <div id="res3" class="footNote"></div>
     </div>
 
-    <!-- Комната 4 -->
     <div class="card">
       <div class="roomHeader">
         <h2 class="roomTitle">Комната 4. Кухня: «Тёплая зельеварня»</h2>
         <span id="teamBadge4" class="badge">Команда</span>
       </div>
-      <p class="story">
-        Котёл булькает, пахнет корицей и цитрусом. Рецепт на стене гласит:
-        <em>«Собери три осенних аромата — и название напитка станет ключом»</em>.
-      </p>
-      <p class="muted">
-        IRL-часть: соберите «ингредиенты» для горячего осеннего чая (например: корица, апельсин, мёд/яблоко —
-        можно реквизит). После того как покажете ведущему, введите слово-ключ: <b>ЧАЙ</b>.
-      </p>
+      <p class="story">Котёл булькает, пахнет корицей и цитрусом…</p>
+      <p class="muted">IRL: соберите «ингредиенты» для осеннего чая (корица, апельсин и т.п.). Ответ: <b>ЧАЙ</b>.</p>
       <div class="sep"></div>
       <label class="muted">Слово-ключ:</label>
-      <input id="ans4" type="text" placeholder="из 3 букв" />
+      <input id="ans4" type="text" placeholder="3 буквы" />
       <div id="res4" class="footNote"></div>
     </div>
 
-    <!-- Финал -->
     <div class="card">
       <div class="roomHeader">
         <h2 class="roomTitle">Финальная дверь</h2>
         <span id="teamBadge5" class="badge">Команда</span>
       </div>
-      <p class="story">
-        На двери выгравировано: <em>«Назовите вслух имя вашей команды и скажите: „Мы готовы выйти“»</em>.
-        Как только ведущий подтвердит, введите общий финальный пароль: <b>ОСЕНЬ</b>.
-      </p>
+      <p class="story">Гравировка: <em>«Назовите вслух имя вашей команды и скажите: “Мы готовы выйти”»</em>.</p>
+      <p class="muted">После подтверждения ведущим введите финальный пароль: <b>ОСЕНЬ</b>.</p>
       <div class="sep"></div>
       <label class="muted">Финальный пароль:</label>
-      <input id="ans5" type="text" placeholder="подсказка: пора года" />
+      <input id="ans5" type="text" placeholder="пора года" />
       <div id="res5" class="footNote"></div>
     </div>
   </section>
 </div>
 
-<!-- Оверлей с командой -->
-<div id="overlay" class="overlay">
+<div id="overlay" class="overlay" aria-modal="true" role="dialog">
   <div class="teamSplash">
-    <div class="subtitle">Ваша команда</div>
+    <div class="footNote">Ваша команда</div>
     <div id="teamName" class="teamName">—</div>
-    <p class="muted">Разделитесь вживую на команды и действуйте вместе. Нажмите, чтобы войти в дом.</p>
-    <button class="btn" id="enterHouse">Войти в дом</button>
+    <p class="muted">Разделитесь офлайн и действуйте вместе. Нажмите, чтобы войти в дом.</p>
+    <button class="btn" id="enterHouse" type="button">Войти в дом</button>
   </div>
 </div>
 
 <script>
-/* ====== Конфиг команд ====== */
+/* ==== Команды ==== */
 const TEAMS = [
   { id:'ghosts',  name:'ПРИЗРАКИ', color:'ghost'   },
   { id:'hunters', name:'ОХОТНИКИ', color:'hunters' }
 ];
 
-/* ====== Утилиты ====== */
+/* ==== Утилиты ==== */
 const $ = s => document.querySelector(s);
+
 function setBadge(elemId, team){
   const el = document.getElementById(elemId);
   if(!el||!team) return;
@@ -235,13 +187,13 @@ function setBadge(elemId, team){
   el.classList.remove('ghost','hunters');
   el.classList.add(team.color);
 }
+
 function applyTeamUI(team){
-  // бейдж в хедере
   const tag = $('#teamTag');
   tag.textContent = team.name;
   tag.classList.remove('ghost','hunters');
   tag.classList.add('teamTag', team.color);
-  // бейджи в комнатах
+
   setBadge('teamBadge1', team);
   setBadge('teamBadge2', team);
   setBadge('teamBadge3', team);
@@ -249,61 +201,40 @@ function applyTeamUI(team){
   setBadge('teamBadge5', team);
 }
 
-/* ====== Жёсткий старт / сброс ====== */
-function hardStart(){
-  const t = TEAMS[Math.floor(Math.random()*TEAMS.length)];
-  localStorage.setItem('hn_team', JSON.stringify(t));
-  showTeamSplash(t);
+/* ==== Старт/Сброс ==== */
+function startGame(){
+  try{
+    const t = TEAMS[Math.floor(Math.random()*TEAMS.length)];
+    localStorage.setItem('hn_team', JSON.stringify(t));
+    applyTeamUI(t);
+    // Покажем оверлей
+    $('#teamName').textContent = t.name;
+    $('#teamName').className = 'teamName ' + t.color;
+    $('#overlay').classList.add('show');
+    // легкая подсказка один раз (можно удалить):
+    if(!localStorage.getItem('hn_hint_shown')){
+      // alert('Ваша команда: ' + t.name); // <- можно раскомментировать как явный индикатор
+      localStorage.setItem('hn_hint_shown','1');
+    }
+  }catch(e){
+    console.log('Start error:', e);
+  }
 }
+
 function resetAll(){
   localStorage.removeItem('hn_team');
+  localStorage.removeItem('hn_hint_shown');
   location.href = location.pathname + '?v=' + Date.now();
 }
 
-/* ====== Экран-плашка команды ====== */
-function showTeamSplash(team){
-  applyTeamUI(team);
-  $('#teamName').textContent = team.name;
-  $('#teamName').className = 'teamName ' + team.color;
-  $('#overlay').classList.add('show');
-}
-
-/* ====== Инициализация ====== */
-function init(){
-  if (location.search.includes('reset')) localStorage.removeItem('hn_team');
-
-  const saved = localStorage.getItem('hn_team');
-  if(saved){
-    const team = JSON.parse(saved);
-    applyTeamUI(team);
-    // показываем кнопку старт всё равно — но можно сразу вход
-  }
-  // Обработчики
-  $('#hardStart').onclick = hardStart;
-  $('#resetAll').onclick = resetAll;
-  $('#enterHouse').onclick = () => {
-    $('#overlay').classList.remove('show');
-    $('#intro').classList.add('hidden');
-    $('#rooms').classList.remove('hidden');
-    window.scrollTo({top:0, behavior:'smooth'});
-  };
-
-  // Валидаторы ответов
-  bindAnswer('ans1','res1', val => val.trim().toUpperCase().startsWith('Д'), 'Отлично, дверь приоткрылась!');
-  bindAnswer('ans2','res2', val => val.trim().toUpperCase()==='МЛТ', 'Шёпот стих — проход открыт.');
-  bindAnswer('ans3','res3', val => val.trim().toUpperCase()==='ВАЛЬС', 'Музыка смолкла — следующая комната ждёт.');
-  bindAnswer('ans4','res4', val => val.trim().toUpperCase()==='ЧАЙ', 'Тепло разлилось — коридор светлеет.');
-  bindAnswer('ans5','res5', val => val.trim().toUpperCase()==='ОСЕНЬ', 'УРА! Дверь распахнулась — вы выбрались!');
-}
-
-/* Привязка проверки */
+/* ==== Валидаторы ==== */
 function bindAnswer(inputId, resId, checker, okMsg){
   const inp = document.getElementById(inputId);
   const res = document.getElementById(resId);
   if(!inp || !res) return;
   inp.addEventListener('input', () => {
-    const v = inp.value;
-    if (!v || v.length<2){ res.textContent=''; return; }
+    const v = (inp.value||'').toString();
+    if (v.trim().length<1){ res.textContent=''; return; }
     if (checker(v)){
       res.innerHTML = `<span class="ok">✔ ${okMsg}</span>`;
       inp.disabled = true;
@@ -313,7 +244,31 @@ function bindAnswer(inputId, resId, checker, okMsg){
   });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+/* ==== Инициализация ==== */
+(function init(){
+  // страховка: навесим обработчики программно
+  document.getElementById('hardStart').addEventListener('click', startGame);
+  document.getElementById('resetAll').addEventListener('click', resetAll);
+  document.getElementById('enterHouse').addEventListener('click', () => {
+    $('#overlay').classList.remove('show');
+    $('#intro').classList.add('hidden');
+    $('#rooms').classList.remove('hidden');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  // если команда уже выбрана — применим оформление
+  const saved = localStorage.getItem('hn_team');
+  if(saved){
+    try{ applyTeamUI(JSON.parse(saved)); }catch(_){}
+  }
+
+  // проверки ответов
+  bindAnswer('ans1','res1', v => v.trim().toUpperCase().startsWith('Д'), 'Отлично, дверь приоткрылась!');
+  bindAnswer('ans2','res2', v => v.trim().toUpperCase()==='МЛТ', 'Шёпот стих — проход открыт.');
+  bindAnswer('ans3','res3', v => v.trim().toUpperCase()==='ВАЛЬС', 'Музыка смолкла — следующая комната ждёт.');
+  bindAnswer('ans4','res4', v => v.trim().toUpperCase()==='ЧАЙ', 'Тепло разлилось — коридор светлеет.');
+  bindAnswer('ans5','res5', v => v.trim().toUpperCase()==='ОСЕНЬ', 'УРА! Дверь распахнулась — вы выбрались!');
+})();
 </script>
 </body>
 </html>
