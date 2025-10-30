@@ -20,7 +20,7 @@ body{
 }
 .container{width:100%; max-width:720px; text-align:center}
 h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
-.lead{color:var(--muted); margin:0 0 18px}
+.lead{color:var(--muted); margin:0 0 18px; min-height:20px}
 .panel{
   background:linear-gradient(180deg,#171a24 0%,#12141c 100%);
   border:1px solid rgba(255,255,255,.08);
@@ -90,7 +90,7 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 <body>
   <div class="container">
     <h1 id="title">Распределение по командам</h1>
-    <p class="lead" id="lead">Разместите палец на сенсоре…</p>
+    <p class="lead" id="lead">Разместите палец на сенсоре и держите…</p>
 
     <div class="panel">
       <div class="scan-wrap">
@@ -130,6 +130,7 @@ const lead=document.getElementById('lead');
 const classFor=t=>t==='ghosts'?'ghost':'hunter';
 const story=t=>t==='ghosts'?'👻 Ваша энергия принадлежит ПРИЗРАКАМ!':'🏹 Вас выбрали ОХОТНИКИ!';
 
+/* счётчики для баланса */
 function getCounts(){
   try{const raw=localStorage.getItem(LS_KEY_COUNTS);
     if(!raw)return{ghosts:0,hunters:0};
@@ -151,73 +152,163 @@ function chooseBalancedTeam(){
   setCounts(c);return t;
 }
 
+/* вибрация и «рябь» */
 function vibrate(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch{}}
-
 function spawnRipple(x,y){
   const r=document.createElement('span');
   r.className='ripple';
   const rect=circle.getBoundingClientRect();
-  const cx=x-rect.left, cy=y-rect.top;
-  r.style.left=cx+'px'; r.style.top=cy+'px';
-  circle.appendChild(r);
-  r.addEventListener('animationend',()=>r.remove());
+  r.style.left=(x-rect.left)+'px'; r.style.top=(y-rect.top)+'px';
+  circle.appendChild(r); r.addEventListener('animationend',()=>r.remove());
 }
 
-function animatePhases(totalMs){
-  const steps=['Сканирую ауру…','Расшифровываю символы…','Сравниваю энергетический отпечаток…',`Совпадение с энергополем — ${60+Math.floor(Math.random()*35)}%`];
-  let i=0,elapsed=0;phase.style.display='block';progress.style.display='block';bar.style.width='0%';
-  const tick=120;const timer=setInterval(()=>{
-    elapsed+=tick;
-    const pct=Math.min(100,Math.floor((elapsed/totalMs)*100));
-    bar.style.width=pct+'%';
-    if(pct>(i+1)*25&&i<steps.length-1)i++;
-    phase.textContent=steps[i];
-    if(elapsed>=totalMs)clearInterval(timer);
-  },tick);
-}
+/* состояния удержания */
+let holding=false, scanning=false, aborted=false;
+let holdStartTimer=null, scanTickTimer=null, scanEndTimer=null;
+let scanTotalMs=0, elapsed=0;
 
-function startScan(){
-  result.style.display='none'; goBtn.style.display='none'; again.style.display='none';
-  hand.style.display='none'; spinner.style.display='block';
-  lead.textContent='Идёт сканирование…';
-  animatePhases(2600+Math.random()*900);
-  const dur=2700+Math.random()*900;
-  setTimeout(()=>{
-    const team=chooseBalancedTeam();
-    localStorage.setItem(LS_KEY_TEAM,team);
-    spinner.style.display='none'; phase.style.display='none'; progress.style.display='none';
-    result.className='result '+classFor(team);
-    result.textContent=story(team);
-    result.style.display='block';
-    again.style.display='inline-block';
-    goBtn.href=`host.html?team=${team}`;
-    goBtn.style.display='inline-block';
-    lead.textContent='Дом произнёс свой вердикт…';
-    vibrate(80);
-  },dur);
-}
+function resetUI(){
+  // сброс любых таймеров
+  clearTimeout(holdStartTimer); clearInterval(scanTickTimer); clearTimeout(scanEndTimer);
+  holding=false; scanning=false; aborted=false; elapsed=0; scanTotalMs=0;
 
-circle.addEventListener('click',(e)=>{
-  if(spinner.style.display==='block')return;
-  circle.classList.add('touching');
-  spawnRipple(e.clientX,e.clientY);
-  vibrate(30);
-  setTimeout(()=>circle.classList.remove('touching'),250);
-  startScan();
-});
-
-again.addEventListener('click',()=>{
-  // сброс интерфейса
+  // визуальный сброс
+  spinner.style.display='none';
+  progress.style.display='none';
+  phase.style.display='none';
+  bar.style.width='0%';
   result.style.display='none';
   goBtn.style.display='none';
   again.style.display='none';
-  spinner.style.display='none';
-  phase.style.display='none';
-  progress.style.display='none';
-  bar.style.width='0%';
   hand.style.display='block';
-  lead.textContent='Разместите палец на сенсоре…';
+  lead.textContent='Разместите палец на сенсоре и держите…';
+  circle.classList.remove('touching');
+}
+
+/* текстовые фазы */
+const phaseSteps=()=>[
+  'Стабилизирую контакт…',
+  'Сканирую ауру…',
+  'Расшифровываю символы…',
+  'Сравниваю энергетический отпечаток…',
+  `Совпадение — ${60+Math.floor(Math.random()*35)}%`
+];
+
+/* запуск сканирования — требует непрерывного удержания */
+function startScanning(){
+  scanning=true; aborted=false; elapsed=0;
+  hand.style.display='none';
+  spinner.style.display='block';
+  progress.style.display='block';
+  phase.style.display='block';
+  lead.textContent='Идёт сканирование…';
+
+  const steps=phaseSteps();
+  const stepCount=steps.length;
+
+  scanTotalMs=2800+Math.random()*1200; // 2.8–4.0 c
+  const tick=120;
+  let currentStep=0;
+  phase.textContent=steps[currentStep];
+
+  scanTickTimer=setInterval(()=>{
+    if(!holding){ // палец убрали — прерываем
+      abortScan('Сканирование прервано — палец убран. Держите до завершения.');
+      return;
+    }
+    elapsed+=tick;
+    const pct=Math.min(100, Math.floor((elapsed/scanTotalMs)*100));
+    bar.style.width=pct+'%';
+    const targetStep=Math.min(stepCount-1, Math.floor(pct/ (100/stepCount)));
+    if(targetStep!==currentStep){ currentStep=targetStep; phase.textContent=steps[currentStep]; }
+    if(elapsed>=scanTotalMs){
+      clearInterval(scanTickTimer);
+      finishScan();
+    }
+  }, tick);
+}
+
+/* завершение сканирования */
+function finishScan(){
+  spinner.style.display='none';
+  progress.style.display='none';
+  phase.style.display='none';
+  scanning=false;
+
+  const team=chooseBalancedTeam();
+  localStorage.setItem(LS_KEY_TEAM,team);
+
+  result.className='result '+classFor(team);
+  result.textContent=story(team);
+  result.style.display='block';
+
+  again.style.display='inline-block';
+  goBtn.href=`host.html?team=${team}`;
+  goBtn.style.display='inline-block';
+
+  lead.textContent='Дом произнёс свой вердикт…';
+  vibrate(80);
+}
+
+/* прерывание сканирования (если палец убрали) */
+function abortScan(msg){
+  clearInterval(scanTickTimer);
+  clearTimeout(scanEndTimer);
+  scanning=false; aborted=true;
+
+  spinner.style.display='none';
+  progress.style.display='none';
+  phase.style.display='none';
+  bar.style.width='0%';
+
+  hand.style.display='block';
+  result.style.display='none';
+  goBtn.style.display='none';
+  again.style.display='inline-block';     // позволим быстро попробовать снова
+  lead.textContent=msg || 'Сканирование прервано. Держите палец до конца.';
+}
+
+/* события ввода */
+circle.addEventListener('pointerdown',(e)=>{
+  if(scanning) return; // уже идёт скан
+  holding=true; aborted=false;
+  circle.classList.add('touching');
+  spawnRipple(e.clientX,e.clientY);
+  vibrate(20);
+
+  // короткая «калибровка контакта» (задержка перед стартом)
+  lead.textContent='Калибрую контакт… не убирайте палец';
+  holdStartTimer=setTimeout(()=>{
+    if(holding && !scanning) startScanning();
+  }, 500); // держать минимум 0.5 с, потом начнётся скан
 });
+
+function endHold(){
+  if(!holding) return;
+  holding=false;
+  circle.classList.remove('touching');
+
+  // если отпустили до старта — просто сбросим на ожидание
+  if(!scanning){
+    clearTimeout(holdStartTimer);
+    lead.textContent='Недостаточно контакта. Держите палец дольше…';
+    hand.style.display='block';
+    again.style.display='inline-block';
+  }
+  // если отпустили во время скана — прервём
+  else{
+    abortScan('Сканирование прервано — палец убран. Держите до завершения.');
+  }
+}
+circle.addEventListener('pointerup', endHold);
+circle.addEventListener('pointerleave', endHold);
+document.addEventListener('pointercancel', endHold);
+
+/* кнопка «Сканировать ещё раз» */
+again.addEventListener('click', resetUI);
+
+/* первичная инициализация */
+resetUI();
 </script>
 </body>
 </html>
