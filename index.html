@@ -1,89 +1,94 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Halloween Night — Главная</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
 <style>
-:root{ --bg:#0d0d10; --accent:#ffb703; --muted:#ccc; }
+:root{
+  --bg:#0b0b0e; --panel1:#1a1d24; --panel2:#12151a;
+  --muted:#cfcfd6; --accent:#ffb703; --accent-2:#ffcf52;
+}
 *{box-sizing:border-box}
 body{
-  margin:0; font-family:'Montserrat',sans-serif;
-  background: radial-gradient(circle at 50% 30%, #1a1c22 0%, #0b0b0e 80%);
-  color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  min-height:100vh; text-align:center; padding:24px 16px;
+  margin:0; font-family:'Montserrat',sans-serif; color:#fff;
+  background: radial-gradient(1000px 600px at 50% 25%, #1a1c22 0%, var(--bg) 70%);
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:24px 16px; text-align:center;
 }
-.topbar{position:fixed; right:16px; top:16px; z-index:10}
-.lang{
-  appearance:none; background:#1f2128; color:#fff; border:1px solid #323540;
-  padding:10px 12px; border-radius:10px; font-weight:800; cursor:pointer;
+h1{font-weight:900; font-size:clamp(26px,5vw,46px); margin:6px 0 10px;}
+p.lead{color:var(--muted); max-width:560px; margin:0 auto 30px;}
+
+.grid{
+  display:grid; gap:16px; width:100%; max-width:980px;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
 }
-h1{font-weight:900;font-size:clamp(26px,5vw,46px);margin:6px 0 10px;}
-p{color:var(--muted);max-width:520px;margin:0 auto 30px;}
-.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));width:90%;max-width:900px;}
+
+/* Карточки */
 .card{
-  background:linear-gradient(180deg,#1a1d24 0%,#12151a 100%);
-  border-radius:18px;overflow:hidden;padding:30px 20px;cursor:pointer;
-  border:1px solid rgba(255,255,255,0.1);transition:all .3s ease; text-decoration:none; color:#fff;
+  background:linear-gradient(180deg,var(--panel1) 0%,var(--panel2) 100%);
+  border-radius:18px; overflow:hidden; padding:30px 20px; cursor:pointer;
+  border:1px solid rgba(255,255,255,.12); transition:all .25s ease;
+  text-decoration:none; color:#fff; outline:none;
 }
-.card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 0 25px rgba(255,183,3,0.25);}
-.card img{width:80px;height:80px;margin-bottom:10px;object-fit:contain;filter:drop-shadow(0 0 10px #000);}
-.card h2{margin:0 0 6px;font-size:20px;font-weight:800;}
-footer{margin-top:30px;color:var(--muted);font-size:14px}
-button{border:none;border-radius:12px;padding:12px 20px;font-weight:900;font-size:16px;cursor:pointer;}
-.btn{background:var(--accent);color:#000;}
-.lang-switch {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: rgba(30, 30, 35, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 6px 10px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 0 12px rgba(0,0,0,0.4);
-  z-index: 2000;
+.card:hover{transform:translateY(-4px); border-color:var(--accent); box-shadow:0 0 24px rgba(255,183,3,.25);}
+.card:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+.card img{width:84px; height:84px; margin-bottom:10px; object-fit:contain; filter:drop-shadow(0 0 10px #000);}
+.card h2{margin:0 0 6px; font-size:20px; font-weight:800;}
+.card p{margin:0; color:var(--muted)}
+
+/* Выделенная (главная) карточка */
+.card.featured{
+  border-color:var(--accent);
+  box-shadow:0 0 32px rgba(255,183,3,.28), inset 0 0 0 1px rgba(255,255,255,.08);
+  transform:scale(1.02);
 }
-.lang-switch img {
-  width: 22px;
-  height: 16px;
-  border-radius: 2px;
+@media (min-width:760px){
+  .card.featured{grid-column:1 / -1; display:grid; grid-template-columns:140px 1fr; gap:18px; text-align:left;}
+  .card.featured img{margin:0 auto}
+  .card.featured h2{font-size:22px}
 }
-  
-/* Модальное окно */
-#modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:1000;}
-.modal-box{background:#15161c;border:1px solid #2c2e36;border-radius:16px;padding:30px 24px;max-width:420px;width:90%;text-align:center;}
-.modal-box h3{margin-top:0;}
-.modal-buttons{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
-.modal-buttons a{display:block;text-decoration:none;padding:14px 0;font-weight:800;border-radius:12px;transition:.3s;}
-.modal-buttons a:first-child{background:var(--accent);color:#000;}
-.modal-buttons a:last-child{background:#24262f;color:#fff;}
+
+/* Футер */
+footer{margin-top:30px; color:var(--muted); font-size:14px}
+
+/* Модалка */
+#modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center; z-index:1000;}
+.modal-box{background:#15161c; border:1px solid #2c2e36; border-radius:16px; padding:30px 24px; max-width:420px; width:90%; text-align:center;}
+.modal-box h3{margin:0 0 8px;}
+.modal-buttons{display:flex; flex-direction:column; gap:12px; margin-top:18px;}
+.modal-buttons a{display:block; text-decoration:none; padding:14px 0; font-weight:800; border-radius:12px; transition:.2s;}
+.modal-buttons a:first-child{background:var(--accent); color:#000;}
+.modal-buttons a:last-child{background:#24262f; color:#fff;}
 .modal-buttons a:hover{transform:scale(1.03);}
+
+/* Плавающий переключатель языка (нижний правый угол) */
+.lang-switch{
+  position:fixed; right:18px; bottom:18px; z-index:1200;
+  display:flex; align-items:center; gap:8px;
+  background:rgba(28,29,36,.92); border:1px solid rgba(255,255,255,.12);
+  border-radius:12px; padding:8px 10px; cursor:pointer; user-select:none;
+  box-shadow:0 8px 20px rgba(0,0,0,.35);
+}
+.lang-switch img{width:22px; height:16px; border-radius:2px}
+.lang-switch span{font-weight:800; color:#fff; font-size:14px}
+.lang-switch:active{transform:scale(.98);}
 </style>
 </head>
 <body>
 
-<!-- Переключатель языка -->
-<div class="topbar">
-  <select id="lang" class="lang" aria-label="Language">
-    <option value="ru">🇷🇺 Рус</option>
-    <option value="es">🇪🇸 Esp</option>
-  </select>
-</div>
-
 <h1 id="t-title">🎃 Halloween Night</h1>
-<p id="t-subtitle">Выберите активность, которую хотите пройти этой ночью. Каждый выбор открывает новую историю...</p>
+<p id="t-subtitle" class="lead">Выберите активность, которую хотите пройти этой ночью. Каждый выбор открывает новую историю...</p>
 
 <div class="grid">
-  <div class="card" id="mysteryHouse" role="button" tabindex="0" aria-label="Мистический дом">
+  <!-- Главная игра -->
+  <div class="card featured" id="mysteryHouse" role="button" tabindex="0" aria-label="Мистический дом">
     <img src="door.png" alt="" />
-    <h2 id="t-house-title">Мистический дом</h2>
-    <p id="t-house-desc">Командный квест с загадками и тайнами.</p>
+    <div>
+      <h2 id="t-house-title">Мистический дом</h2>
+      <p id="t-house-desc"><b>Главная игра вечера!</b> Командный квест с загадками и тайнами.</p>
+    </div>
   </div>
 
   <a class="card" href="hunt.html" aria-label="Охота на призраков">
@@ -107,7 +112,7 @@ button{border:none;border-radius:12px;padding:12px 20px;font-weight:900;font-siz
 
 <footer id="t-footer">© Halloween Night, 2025</footer>
 
-<!-- Модалка -->
+<!-- Модальное окно -->
 <div id="modal" role="dialog" aria-modal="true" aria-labelledby="t-modal-title">
   <div class="modal-box">
     <h3 id="t-modal-title">🏚 Войти в Мистический дом</h3>
@@ -120,14 +125,21 @@ button{border:none;border-radius:12px;padding:12px 20px;font-weight:900;font-siz
   </div>
 </div>
 
+<!-- Плавающий переключатель языка -->
+<button class="lang-switch" id="langSwitch" type="button" aria-label="Сменить язык">
+  <img id="langFlag" src="https://flagcdn.com/w20/ru.png" alt="ru" />
+  <span id="langText">Рус</span>
+</button>
+
 <script>
-/* ---------- i18n словарь ---------- */
+const $ = (s)=>document.querySelector(s);
+
 const I18N = {
   ru: {
     title:'🎃 Halloween Night',
     subtitle:'Выберите активность, которую хотите пройти этой ночью. Каждый выбор открывает новую историю...',
     houseTitle:'Мистический дом',
-    houseDesc:'Командный квест с загадками и тайнами.',
+    houseDesc:'<b>Главная игра вечера!</b> Командный квест с загадками и тайнами.',
     huntTitle:'Охота на призраков',
     huntDesc:'Кто найдёт всех первым?',
     bingoTitle:'Halloween Bingo',
@@ -140,12 +152,13 @@ const I18N = {
     modalEnter:'🚪 Войти в дом',
     modalNote:'(Рекомендуется начать с распределения)',
     footer:'© Halloween Night, 2025',
+    langShort:'Рус', flag:'ru'
   },
   es: {
     title:'🎃 Noche de Halloween',
     subtitle:'Elige la actividad que quieres vivir esta noche. Cada elección abre una nueva historia…',
     houseTitle:'Casa Misteriosa',
-    houseDesc:'Juego por equipos con acertijos y secretos.',
+    houseDesc:'<b>¡Juego principal de la noche!</b> Juego por equipos con acertijos y secretos.',
     huntTitle:'Caza de Fantasmas',
     huntDesc:'¿Quién los encontrará primero?',
     bingoTitle:'Bingo de Halloween',
@@ -154,77 +167,47 @@ const I18N = {
     lockDesc:'¡Pon a prueba tu atención!',
     modalTitle:'🏚 Entrar en la Casa Misteriosa',
     modalLead:'Elige por dónde empezar:',
-    modalAssign:'🔮 Pasar la Asignación de Equipos',
-    modalEnter:'🚪 Entrar en la Casa',
+    modalAssign:'🔮 Pasar la asignación de equipos',
+    modalEnter:'🚪 Entrar en la casa',
     modalNote:'(Se recomienda empezar por la asignación)',
     footer:'© Noche de Halloween, 2025',
+    langShort:'Esp', flag:'es'
   }
 };
 
-/* ---------- применение перевода ---------- */
 function applyLang(lang){
   const t = I18N[lang] || I18N.ru;
   document.documentElement.lang = lang;
-
-  // основные тексты
   $('#t-title').textContent = t.title;
   $('#t-subtitle').textContent = t.subtitle;
   $('#t-house-title').textContent = t.houseTitle;
-  $('#t-house-desc').textContent = t.houseDesc;
+  $('#t-house-desc').innerHTML = t.houseDesc;
   $('#t-hunt-title').textContent = t.huntTitle;
   $('#t-hunt-desc').textContent = t.huntDesc;
   $('#t-bingo-title').textContent = t.bingoTitle;
   $('#t-bingo-desc').textContent = t.bingoDesc;
   $('#t-lock-title').textContent = t.lockTitle;
   $('#t-lock-desc').textContent = t.lockDesc;
-  $('#t-footer').textContent = t.footer;
-
-  // модалка
   $('#t-modal-title').textContent = t.modalTitle;
   $('#t-modal-lead').textContent = t.modalLead;
   $('#t-modal-assign').textContent = t.modalAssign;
   $('#t-modal-enter').textContent = t.modalEnter;
   $('#t-modal-note').textContent = t.modalNote;
-
-  // подпись в селекте
-  $('#lang').value = lang;
+  $('#t-footer').textContent = t.footer;
+  $('#langText').textContent = t.langShort;
+  $('#langFlag').src = `https://flagcdn.com/w20/${t.flag}.png`;
+  $('#langFlag').alt = t.flag;
   localStorage.setItem('hn_lang', lang);
 }
 
-/* ---------- утилита $ ---------- */
-function $(sel){ return document.querySelector(sel); }
-
-/* ---------- модалка ---------- */
 const modal = $('#modal');
 $('#mysteryHouse').addEventListener('click',()=>{ modal.style.display='flex'; });
-$('#mysteryHouse').addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); modal.style.display='flex'; }});
+$('#mysteryHouse').addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); modal.style.display='flex'; }});
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.style.display='none'; }});
 
-/* ---------- обработчик языка ---------- */
-const saved = localStorage.getItem('hn_lang') || 'ru';
-applyLang(saved);
-$('#lang').addEventListener('change', e=> applyLang(e.target.value));
-<div class="lang-switch" onclick="toggleLang()">
-  <img id="langFlag" src="https://flagcdn.com/w20/ru.png" alt="Lang">
-  <span id="langText">Рус</span>
-</div>
-
-<script>
-let lang = localStorage.getItem('lang') || 'ru';
-function toggleLang(){
-  lang = (lang === 'ru') ? 'es' : 'ru';
-  localStorage.setItem('lang', lang);
-  document.getElementById('langText').textContent = (lang === 'ru') ? 'Рус' : 'Esp';
-  document.getElementById('langFlag').src = (lang === 'ru')
-    ? 'https://flagcdn.com/w20/ru.png'
-    : 'https://flagcdn.com/w20/es.png';
-  location.reload();
-}
-document.getElementById('langText').textContent = (lang === 'ru') ? 'Рус' : 'Esp';
-document.getElementById('langFlag').src = (lang === 'ru')
-  ? 'https://flagcdn.com/w20/ru.png'
-  : 'https://flagcdn.com/w20/es.png';
+let lang = localStorage.getItem('hn_lang') || 'ru';
+applyLang(lang);
+$('#langSwitch').addEventListener('click',()=>{ lang = (lang==='ru') ? 'es' : 'ru'; applyLang(lang); });
 </script>
-
 </body>
 </html>
