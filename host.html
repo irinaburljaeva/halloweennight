@@ -1,300 +1,309 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Таинственный дом — Командный квест (Host)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Таинственный дом — командный квест</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#0e0e11; --panel:#181a20; --muted:#b7bac4; --accent:#ffb703;
-    --ghost:#7dd3fc; --hunters:#fca5a5;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{
-    margin:0; color:#fff; background:var(--bg);
-    font-family:Montserrat,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-  }
-  header{
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
-    padding:16px; position:sticky; top:0; background:#0e0e11e6; backdrop-filter:saturate(130%) blur(6px); z-index:10;
-    border-bottom:1px solid #2a2d36;
-  }
-  h1{margin:0; font-size:clamp(18px,3.4vw,32px); line-height:1.1}
-  .btn{border:none; border-radius:12px; padding:10px 14px; font-weight:900; cursor:pointer}
-  .btn.primary{background:var(--accent); color:#000}
-  .btn.secondary{background:#252a34; color:#fff}
-  .teamTag{display:none; border:1px solid #ffffff1a; border-radius:999px; padding:8px 12px; font-weight:800}
-  .teamTag.ghost{display:inline-block; background:color-mix(in oklab, var(--ghost) 20%, #000 80%); color:#e9f9ff}
-  .teamTag.hunters{display:inline-block; background:color-mix(in oklab, var(--hunters) 20%, #000 80%); color:#fff2f2}
-  .wrap{max-width:980px; margin:20px auto; padding:0 16px}
-  .card{
-    background:linear-gradient(180deg,#1a1d24 0%,#12151a 100%);
-    border:1px solid #2b2f39; border-radius:18px; overflow:hidden;
-    box-shadow:0 20px 80px #0008;
-  }
-  .roomHero{
-    aspect-ratio:16/9; width:100%; background:#0d0f14 center/cover no-repeat;
-    border-bottom:1px solid #2b2f39; position:relative;
-  }
-  .roomBody{padding:18px}
-  .roomTitle{margin:0 0 8px; font-size:clamp(20px,3vw,28px)}
-  .story{color:#e6e7ec; margin:0 0 8px}
-  .muted{color:var(--muted)}
-  .inputRow{display:flex; gap:10px; margin-top:12px}
-  input[type=text]{flex:1; padding:12px 14px; border-radius:12px; border:1px solid #2f3340; background:#0f1116; color:#fff; outline:none}
-  .notice{margin-top:8px; font-weight:700}
-  .ok{color:#9dffb2}
-  .fail{color:#ffb4b4}
-  .foot{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:14px}
-  .nextBtn{display:none}
-  .nextBtn.show{display:inline-block}
-  .overlay{position:fixed; inset:0; display:none; place-items:center; background:#000a; z-index:20}
-  .overlay.show{display:grid}
-  .splash{
-    width:min(720px,92vw); background:linear-gradient(180deg,#1b1e26 0%,#12151a 100%);
-    border:1px solid #2b2f39; border-radius:18px; padding:22px; text-align:center;
-  }
-  .teamName{font-size:clamp(28px,5vw,44px); margin:6px 0 14px}
-  .teamName.ghost{color:var(--ghost)}
-  .teamName.hunters{color:var(--hunters)}
-  .progress{margin:8px 0 0; color:#bfc3ce; font-size:14px}
+:root{--bg:#0e0f13;--card:#151821;--line:#2a2f3a;--muted:#b9bfcc;--acc:#ffb703;--ok:#9dffb2;--bad:#ffb4b4;--ghost:#7dd3fc;--hunt:#fca5a5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font-family:Montserrat,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+header{position:sticky;top:0;z-index:10;display:flex;gap:10px;align-items:center;justify-content:space-between;padding:14px 16px;background:#0d0f12e0;backdrop-filter:saturate(130%) blur(6px);border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:clamp(18px,3.4vw,30px)}
+.wrap{max-width:980px;margin:18px auto;padding:0 16px}
+.card{background:linear-gradient(180deg,#1a1e28 0%,#12151a 100%);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 18px 70px #0008}
+.roomHero{aspect-ratio:16/9;background:#0f1218 center/cover no-repeat;width:100%;border-bottom:1px solid var(--line)}
+.roomBody{padding:18px}
+.roomTitle{margin:0 0 8px;font-size:clamp(20px,3vw,28px)}
+.story{margin:0 0 8px}
+.muted{color:var(--muted)}
+.btn{border:none;border-radius:12px;padding:10px 14px;font-weight:900;cursor:pointer}
+.btn.primary{background:var(--acc);color:#000}
+.btn.ghost{background:color-mix(in oklab,var(--ghost) 28%,#000);}
+.btn.hunt{background:color-mix(in oklab,var(--hunt) 28%,#000);}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=text]{flex:1;min-width:200px;background:#0f1116;border:1px solid #323645;color:#fff;border-radius:12px;padding:12px 14px}
+.notice{margin-top:8px;font-weight:800}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
+.footer{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+.hidden{display:none}
+.teamTag{display:none;border:1px solid #ffffff1c;border-radius:999px;padding:6px 10px;font-weight:800}
+.teamTag.show{display:inline-block}
+.teamTag.ghost{background:color-mix(in oklab,var(--ghost) 18%,#000 82%);color:#e8f9ff}
+.teamTag.hunt{background:color-mix(in oklab,var(--hunt) 18%,#000 82%);color:#fff1f1}
+.progress{color:#c7ccd8;font-size:14px}
+.holdHint{font-size:12px;color:#aeb4c2;margin-top:4px}
 </style>
 </head>
 <body>
 <header>
-  <h1>Таинственный дом — Командный квест</h1>
-  <div style="display:flex;gap:8px;align-items:center">
-    <div id="teamTag" class="teamTag" aria-live="polite"></div>
+  <h1>Таинственный дом — командный квест</h1>
+  <div class="row" style="align-items:center">
+    <span id="teamTag" class="teamTag">Команда</span>
     <button id="btnStart" class="btn primary" type="button">Старт</button>
-    <button id="btnReset" class="btn secondary" type="button">Сброс</button>
+    <button id="btnReset" class="btn" type="button" style="background:#273042;color:#cfd5e3">Сброс</button>
   </div>
 </header>
 
 <div class="wrap">
+  <!-- Вступление -->
   <section id="intro" class="card">
-    <div class="roomHero" style="background-image:url('door.png');"></div>
+    <div class="roomHero" style="background-image:url('door.png')"></div>
     <div class="roomBody">
       <p class="story">
-        Хэллоуин. Свет мигает, ветер воет — и вы находите старый дом. Он сам делит гостей на две команды
-        и впускает только тех, кто решает загадки. Нажмите <b>«Старт»</b>, чтобы узнать свою команду
-        и войти внутрь.
+        В ночь Хэллоуина вы заходите в таинственный дом. Внутри — четыре комнаты:
+        <b>Библиотека</b>, <b>Комната алхимика</b>, <b>Зал зеркал</b> и <b>Финальная дверь</b>.
+        Дом сам распределит всех на две команды и впустит только тех, кто выполнит задания.
       </p>
-      <p class="muted">Подсказок на экране минимум — всё делаем вместе офлайн.</p>
+      <p class="muted">Нажмите «Старт», чтобы узнать свою команду и начать.</p>
     </div>
   </section>
 
-  <section id="room" class="card" style="display:none">
+  <!-- Текущая комната -->
+  <section id="room" class="card hidden" aria-live="polite">
     <div id="roomHero" class="roomHero"></div>
     <div class="roomBody">
       <h2 id="roomTitle" class="roomTitle"></h2>
       <p id="roomStory" class="story"></p>
-      <p id="roomIrl" class="muted"></p>
 
-      <div class="inputRow">
-        <input id="answer" type="text" placeholder="введите ответ"/>
-        <button id="check" class="btn secondary" type="button">Проверить</button>
-      </div>
+      <!-- Содержимое задач / ввод ответа -->
+      <div id="taskBox"></div>
+
       <div id="result" class="notice"></div>
-
-      <div class="foot">
-        <div class="progress" id="progressText">Комната 1 из 4</div>
-        <button id="next" class="btn primary nextBtn" type="button">Дальше</button>
+      <div class="footer">
+        <div id="progress" class="progress">Комната 1 из 4</div>
+        <button id="nextBtn" class="btn primary hidden" type="button">Дальше</button>
       </div>
     </div>
   </section>
 
-  <section id="final" class="card" style="display:none">
-    <div class="roomHero" style="background-image:url('door.png');"></div>
+  <!-- Финал -->
+  <section id="final" class="card hidden">
+    <div class="roomHero" style="background-image:url('door.png')"></div>
     <div class="roomBody">
-      <h2 class="roomTitle">Выбрались!</h2>
-      <p class="story">Скрип двери стихает. Дом принимает вас — и отпускает. Отличная работа, команда!</p>
+      <h2 class="roomTitle">Дверь распахнулась!</h2>
+      <p class="story">Дом принял вашу смелость и смекалку. Отличная работа, команда!</p>
       <p id="finalTeam" class="muted"></p>
-      <button id="playAgain" class="btn secondary" type="button">Сыграть ещё раз</button>
+      <button id="again" class="btn" type="button" style="background:#273042;color:#cfd5e3">Сыграть снова</button>
     </div>
   </section>
-</div>
-
-<!-- Оверлей команды -->
-<div id="overlay" class="overlay" aria-modal="true" role="dialog">
-  <div class="splash">
-    <div class="muted">Ваша команда</div>
-    <div id="teamName" class="teamName">—</div>
-    <p class="muted" style="margin-top:-6px">Разделитесь офлайн и действуйте вместе. Нажмите, чтобы войти в дом.</p>
-    <button id="enter" class="btn primary" type="button">Войти в дом</button>
-  </div>
 </div>
 
 <script>
-  // ===== Команды
-  const TEAMS = [
-    { id:'ghosts',  name:'ПРИЗРАКИ', color:'ghost'   },
-    { id:'hunters', name:'ОХОТНИКИ', color:'hunters' }
-  ];
+const TEAMS = [
+  { id:'ghosts', name:'ПРИЗРАКИ', tag:'ghost' },
+  { id:'hunters', name:'ОХОТНИКИ', tag:'hunt' }
+];
 
-  // ===== Комнаты (твои картинки)
-  const ROOMS = [
-    {
-      key:'library',
-      title:'Библиотека',
-      img:'library.png',
-      story:'Пыльные полки и картотека. На столе шёпотом пишет перо.',
-      irl:'Найдите в комнате три «шуршащих» предмета и положите их на стол. Первые буквы слов составляют пароль.',
-      answer:'КНИГА', // можно изменить
-      accept:(v)=> v.trim().toUpperCase()==='КНИГА'
-    },
-    {
-      key:'alchemy',
-      title:'Комната алхимика',
-      img:'alchemy.png',
-      story:'Колбы, аромат корицы и цитруса. На стене формула, где вместо знака вопроса — слово.',
-      irl:'Соберите ингредиенты для «осеннего чая»: корица + цитрус + вода. Скажитесь вместе «готово». Пароль — слово «ЧАЙ».',
-      answer:'ЧАЙ',
-      accept:(v)=> v.trim().toUpperCase()==='ЧАЙ'
-    },
-    {
-      key:'mirrors',
-      title:'Зал зеркал',
-      img:'mirrors.png',
-      story:'Отражения множатся, буквы путаются. На полу надпись наоборот.',
-      irl:'Найдите где-нибудь слово, написанное наоборот, и прочтите его вслух. Пароль — это слово «ВАЛЬС».',
-      answer:'ВАЛЬС',
-      accept:(v)=> v.trim().toUpperCase()==='ВАЛЬС'
-    },
-    {
-      key:'door',
-      title:'Финальная дверь',
-      img:'door.png',
-      story:'Гравировка: «Назовите вслух имя вашей команды и скажите: “Мы готовы выйти”».',
-      irl:'После подтверждения ведущим введите финальный пароль: «ОСЕНЬ».',
-      answer:'ОСЕНЬ',
-      accept:(v)=> v.trim().toUpperCase()==='ОСЕНЬ'
+// Сюжетные комнаты
+const ROOMS = [
+  // 1. Библиотека
+  {
+    key:'library',
+    title:'Комната 1. Библиотека — «Шёпот страниц»',
+    img:'library.png',
+    story: 'Полки до потолка, карточный каталог и скрип перьевой ручки. На столе записка: «Ключ — в первых буквах найденного».',
+    render(container, helpers){
+      // список предметов, первые буквы дадут «КНИГА»
+      const items = ['Кружка','Ножницы','Игрушка','Гирлянда','Апельсин'];
+      container.innerHTML = `
+        <p><b>Соберите 5 предметов в квартире:</b></p>
+        <ul style="margin-top:6px">
+          ${items.map(it=>`<li>${it}</li>`).join('')}
+        </ul>
+        <p class="muted">Возьмите первые буквы предметов, сложите их в слово — это пароль.</p>
+        <div class="row" style="margin-top:10px">
+          <input id="libAnswer" type="text" placeholder="введите пароль" autocomplete="off">
+          <button id="libCheck" class="btn" type="button" style="background:#273042;color:#cfd5e3">Проверить</button>
+        </div>
+      `;
+      const inp = container.querySelector('#libAnswer');
+      const btn = container.querySelector('#libCheck');
+      btn.onclick = ()=> {
+        const v = (inp.value||'').trim().toUpperCase();
+        helpers.check(v==='КНИГА');
+      };
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
     }
-  ];
+  },
+  // 2. Алхимик
+  {
+    key:'alchemy',
+    title:'Комната 2. Алхимик — «Тёплое зелье»',
+    img:'alchemy.png',
+    story: 'Сияют колбы, пахнет корицей и цитрусом. На стене рецепт, но дом ждёт совместного приготовления.',
+    render(container, helpers){
+      container.innerHTML = `
+        <p><b>Приготовьте зелье «Осеннее тепло»:</b></p>
+        <ol style="margin-top:6px">
+          <li>Стакан тёплой воды</li>
+          <li>Кружок апельсина или лимона</li>
+          <li>Палочка корицы (или щепотка молотой)</li>
+          <li>1 ч.л. мёда (по желанию)</li>
+        </ol>
+        <p class="muted">Команда вместе находит ингредиенты и делает напиток. После того как ведущий попробует — удержите кнопку ниже 2 секунды.</p>
+        <button id="holdOk" class="btn primary" type="button">Ведущий подтверждает</button>
+        <div class="holdHint">Нажмите и удерживайте 2 секунды</div>
+      `;
+      // длинное нажатие
+      const btn = container.querySelector('#holdOk');
+      let t=null;
+      btn.addEventListener('pointerdown', ()=>{ t=setTimeout(()=>helpers.check(true),2000); });
+      ['pointerup','pointerleave','pointercancel'].forEach(ev=>btn.addEventListener(ev,()=>{clearTimeout(t)}));
+    }
+  },
+  // 3. Зал зеркал
+  {
+    key:'mirrors',
+    title:'Комната 3. Зал зеркал — «Отражённый танец»',
+    img:'mirrors.png',
+    story: 'Зеркала множат движения, будто дом хочет игры.',
+    render(container, helpers){
+      container.innerHTML = `
+        <p><b>Задание «Телефон жестов»:</b></p>
+        <p>Игроки становятся кругом. Первый придумывает одно короткое движение (например, хлопок над головой).</p>
+        <p>Второй отворачивается, первый показывает жест третьему; третий повторяет и добавляет свой и т. д. — пока жестов не станет <b>5</b>. Все повторяют финальную связку синхронно.</p>
+        <p class="muted">После удачной синхронизации ведущий удерживает кнопку 2 секунды, чтобы дом открыл путь дальше.</p>
+        <button id="holdOk2" class="btn primary" type="button">Ведущий подтверждает</button>
+        <div class="holdHint">Нажмите и удерживайте 2 секунды</div>
+      `;
+      const btn = container.querySelector('#holdOk2');
+      let t=null;
+      btn.addEventListener('pointerdown', ()=>{ t=setTimeout(()=>helpers.check(true),2000); });
+      ['pointerup','pointerleave','pointercancel'].forEach(ev=>btn.addEventListener(ev,()=>clearTimeout(t)));
+    }
+  },
+  // 4. Дверь
+  {
+    key:'door',
+    title:'Финальная дверь — «Тихий спутник»',
+    img:'door.png',
+    story: 'На древней бронзовой табличке выбито: «Назови меня — и я исчезну во тьме».',
+    render(container, helpers){
+      container.innerHTML = `
+        <p><b>Загадка дома:</b> <i>«Шагаю рядом при свете, но исчезаю во тьме. Кто я?»</i></p>
+        <div class="row" style="margin-top:10px">
+          <input id="doorAnswer" type="text" placeholder="ваш ответ">
+          <button id="doorCheck" class="btn" type="button" style="background:#273042;color:#cfd5e3">Проверить</button>
+        </div>
+      `;
+      const inp = container.querySelector('#doorAnswer');
+      const btn = container.querySelector('#doorCheck');
+      btn.onclick = ()=>{
+        const v=(inp.value||'').trim().toLowerCase();
+        const ok=['тень','моя тень','тенёк'].includes(v);
+        helpers.check(ok);
+      };
+      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
+    }
+  }
+];
 
-  // ===== Селекторы
-  const $ = (s)=>document.querySelector(s);
-  const el = {
-    teamTag: $('#teamTag'),
-    btnStart: $('#btnStart'),
-    btnReset: $('#btnReset'),
-    overlay: $('#overlay'),
-    teamName: $('#teamName'),
-    enter: $('#enter'),
-    intro: $('#intro'),
-    room: $('#room'),
-    hero: $('#roomHero'),
-    title: $('#roomTitle'),
-    story: $('#roomStory'),
-    irl: $('#roomIrl'),
-    answer: $('#answer'),
-    check: $('#check'),
-    result: $('#result'),
-    next: $('#next'),
-    progress: $('#progressText'),
-    final: $('#final'),
-    finalTeam: $('#finalTeam'),
-    playAgain: $('#playAgain')
+// ------------ DOM
+const $ = s => document.querySelector(s);
+const intro = $('#intro');
+const roomCard = $('#room');
+const finalCard = $('#final');
+const teamTag = $('#teamTag');
+const btnStart = $('#btnStart');
+const btnReset = $('#btnReset');
+const nextBtn = $('#nextBtn');
+const result = $('#result');
+const roomHero = $('#roomHero');
+const roomTitle = $('#roomTitle');
+const roomStory = $('#roomStory');
+const taskBox = $('#taskBox');
+const progress = $('#progress');
+const finalTeam = $('#finalTeam');
+const again = $('#again');
+
+let team = null;
+let idx = 0;
+
+// восстановление состояния
+(function restore(){
+  const t = localStorage.getItem('th_team');
+  const i = localStorage.getItem('th_idx');
+  if (t) team = JSON.parse(t);
+  if (i) idx = +i || 0;
+  if (team){
+    showTeamTag();
+    if (idx>0 || i==='0'){ intro.classList.add('hidden'); showRoom(); }
+  }
+})();
+
+function showTeamTag(){
+  teamTag.textContent = team.name;
+  teamTag.classList.add('show', team.tag);
+  // кнопка старт меняет цвет под команду
+  btnStart.classList.remove('primary'); btnStart.classList.add(team.tag);
+}
+
+function pickTeam(){
+  team = TEAMS[Math.floor(Math.random()*TEAMS.length)];
+  localStorage.setItem('th_team', JSON.stringify(team));
+  showTeamTag();
+  // переход в первую комнату
+  idx = 0;
+  localStorage.setItem('th_idx','0');
+  intro.classList.add('hidden');
+  showRoom();
+}
+
+function showRoom(){
+  const R = ROOMS[idx];
+  if (!R){ return showFinal(); }
+  roomCard.classList.remove('hidden');
+  finalCard.classList.add('hidden');
+  roomHero.style.backgroundImage = `url('${R.img}')`;
+  roomTitle.textContent = R.title;
+  roomStory.textContent = R.story;
+  progress.textContent = `Комната ${idx+1} из ${ROOMS.length}`;
+  taskBox.innerHTML = '';
+  result.textContent = '';
+  result.className='notice';
+  nextBtn.classList.add('hidden');
+
+  // помощник для комнаты
+  const helpers = {
+    check(ok){
+      if (ok){
+        result.textContent = '✔ Верно! Путь открыт.';
+        result.className = 'notice ok';
+        nextBtn.classList.remove('hidden');
+      } else {
+        result.textContent = '✖ Пока не то. Попробуйте иначе.';
+        result.className = 'notice bad';
+      }
+    }
   };
+  R.render(taskBox, helpers);
+}
 
-  // ===== Состояние
-  let team = null;
-  let idx = 0;
+function nextRoom(){
+  idx++;
+  localStorage.setItem('th_idx', String(idx));
+  if (idx>=ROOMS.length) showFinal(); else showRoom();
+}
 
-  // загрузка из localStorage
-  (function loadState(){
-    const t = localStorage.getItem('hn_team');
-    const i = localStorage.getItem('hn_idx');
-    if (t){ try{ team = JSON.parse(t);}catch{} }
-    if (i){ idx = +i || 0; }
-    if (team){ applyTeam(team); }
-    if (team && idx>0){ // уже играем
-      showRoom();
-      el.intro.style.display='none';
-    }
-  })();
+function showFinal(){
+  roomCard.classList.add('hidden');
+  finalCard.classList.remove('hidden');
+  finalTeam.textContent = `Команда: ${team ? team.name : '—'}`;
+  localStorage.removeItem('th_idx');
+}
 
-  // ===== Логика команд
-  function applyTeam(t){
-    team = t;
-    localStorage.setItem('hn_team', JSON.stringify(t));
-    el.teamTag.textContent = t.name;
-    el.teamTag.className = 'teamTag ' + (t.color||'');
-  }
+function resetAll(){
+  localStorage.removeItem('th_idx');
+  localStorage.removeItem('th_team');
+  location.reload();
+}
 
-  function pickTeam(){
-    const t = TEAMS[Math.floor(Math.random()*TEAMS.length)];
-    applyTeam(t);
-    el.teamName.textContent = t.name;
-    el.teamName.className = 'teamName ' + (t.color||'');
-    el.overlay.classList.add('show');
-  }
-
-  // ===== Показ комнаты
-  function showRoom(){
-    const room = ROOMS[idx];
-    if (!room){ return showFinal(); }
-    el.room.style.display = '';
-    el.hero.style.backgroundImage = `url('${room.img}')`;
-    el.title.textContent = room.title;
-    el.story.textContent = room.story;
-    el.irl.textContent = 'IRL: ' + room.irl;
-    el.answer.value='';
-    el.result.textContent='';
-    el.result.className='notice';
-    el.next.classList.remove('show');
-    el.progress.textContent = `Комната ${idx+1} из ${ROOMS.length}`;
-  }
-
-  function showFinal(){
-    el.room.style.display='none';
-    el.final.style.display='';
-    el.finalTeam.textContent = `Команда: ${team?team.name:'—'}`;
-    localStorage.removeItem('hn_idx');
-  }
-
-  // ===== Проверка ответа
-  function checkAnswer(){
-    const v = el.answer.value || '';
-    const ok = ROOMS[idx].accept(v);
-    if (ok){
-      el.result.textContent = '✔ Верно! Можно дальше.';
-      el.result.className = 'notice ok';
-      el.next.classList.add('show');
-    } else {
-      el.result.textContent = '✖ Не то. Попробуйте иначе…';
-      el.result.className = 'notice fail';
-    }
-  }
-
-  function nextRoom(){
-    idx++;
-    localStorage.setItem('hn_idx', String(idx));
-    if (idx>=ROOMS.length){ showFinal(); }
-    else { showRoom(); window.scrollTo({top:0,behavior:'smooth'}); }
-  }
-
-  function resetAll(){
-    localStorage.removeItem('hn_team');
-    localStorage.removeItem('hn_idx');
-    location.href = location.pathname + '?v=' + Date.now();
-  }
-
-  // ===== События
-  el.btnStart.addEventListener('click', pickTeam);
-  el.btnReset.addEventListener('click', resetAll);
-  el.enter.addEventListener('click', ()=>{
-    el.overlay.classList.remove('show');
-    el.intro.style.display='none';
-    idx = 0;
-    localStorage.setItem('hn_idx','0');
-    showRoom();
-  });
-  el.check.addEventListener('click', checkAnswer);
-  el.answer.addEventListener('keydown', (e)=>{ if(e.key==='Enter') checkAnswer(); });
-  el.next.addEventListener('click', nextRoom);
-  el.playAgain.addEventListener('click', resetAll);
+btnStart.addEventListener('click', pickTeam);
+btnReset.addEventListener('click', resetAll);
+nextBtn.addEventListener('click', nextRoom);
+again.addEventListener('click', resetAll);
 </script>
 </body>
 </html>
