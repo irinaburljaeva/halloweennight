@@ -6,33 +6,37 @@
 <title>Halloween Night — Главная</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0d0d10; --accent:#ffb703; --muted:#ccc;
-}
+:root{ --bg:#0d0d10; --accent:#ffb703; --muted:#ccc; }
+*{box-sizing:border-box}
 body{
   margin:0; font-family:'Montserrat',sans-serif;
   background: radial-gradient(circle at 50% 30%, #1a1c22 0%, #0b0b0e 80%);
   color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
-  min-height:100vh; text-align:center;
+  min-height:100vh; text-align:center; padding:24px 16px;
 }
-h1{font-weight:900;font-size:clamp(26px,5vw,46px);margin:0 0 10px;}
-p{color:var(--muted);max-width:480px;margin:0 auto 30px;}
+.topbar{position:fixed; right:16px; top:16px; z-index:10}
+.lang{
+  appearance:none; background:#1f2128; color:#fff; border:1px solid #323540;
+  padding:10px 12px; border-radius:10px; font-weight:800; cursor:pointer;
+}
+h1{font-weight:900;font-size:clamp(26px,5vw,46px);margin:6px 0 10px;}
+p{color:var(--muted);max-width:520px;margin:0 auto 30px;}
 .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));width:90%;max-width:900px;}
 .card{
   background:linear-gradient(180deg,#1a1d24 0%,#12151a 100%);
   border-radius:18px;overflow:hidden;padding:30px 20px;cursor:pointer;
-  border:1px solid rgba(255,255,255,0.1);transition:all .3s ease;
+  border:1px solid rgba(255,255,255,0.1);transition:all .3s ease; text-decoration:none; color:#fff;
 }
 .card:hover{transform:translateY(-4px);border-color:var(--accent);box-shadow:0 0 25px rgba(255,183,3,0.25);}
 .card img{width:80px;height:80px;margin-bottom:10px;object-fit:contain;filter:drop-shadow(0 0 10px #000);}
-.card h2{margin:0;font-size:20px;font-weight:800;}
+.card h2{margin:0 0 6px;font-size:20px;font-weight:800;}
 footer{margin-top:30px;color:var(--muted);font-size:14px}
 button{border:none;border-radius:12px;padding:12px 20px;font-weight:900;font-size:16px;cursor:pointer;}
 .btn{background:var(--accent);color:#000;}
 
 /* Модальное окно */
 #modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;z-index:1000;}
-.modal-box{background:#15161c;border:1px solid #2c2e36;border-radius:16px;padding:30px 24px;max-width:400px;width:90%;text-align:center;}
+.modal-box{background:#15161c;border:1px solid #2c2e36;border-radius:16px;padding:30px 24px;max-width:420px;width:90%;text-align:center;}
 .modal-box h3{margin-top:0;}
 .modal-buttons{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
 .modal-buttons a{display:block;text-decoration:none;padding:14px 0;font-weight:800;border-radius:12px;transition:.3s;}
@@ -43,58 +47,142 @@ button{border:none;border-radius:12px;padding:12px 20px;font-weight:900;font-siz
 </head>
 <body>
 
-<h1>🎃 Halloween Night</h1>
-<p>Выберите активность, которую хотите пройти этой ночью. Каждый выбор открывает новую историю...</p>
+<!-- Переключатель языка -->
+<div class="topbar">
+  <select id="lang" class="lang" aria-label="Language">
+    <option value="ru">🇷🇺 Рус</option>
+    <option value="es">🇪🇸 Esp</option>
+  </select>
+</div>
+
+<h1 id="t-title">🎃 Halloween Night</h1>
+<p id="t-subtitle">Выберите активность, которую хотите пройти этой ночью. Каждый выбор открывает новую историю...</p>
 
 <div class="grid">
-  <div class="card" id="mysteryHouse">
-    <img src="door.png" alt="">
-    <h2>Мистический дом</h2>
-    <p>Командный квест с загадками и тайнами.</p>
+  <div class="card" id="mysteryHouse" role="button" tabindex="0" aria-label="Мистический дом">
+    <img src="door.png" alt="" />
+    <h2 id="t-house-title">Мистический дом</h2>
+    <p id="t-house-desc">Командный квест с загадками и тайнами.</p>
   </div>
 
-  <a class="card" href="hunt.html">
+  <a class="card" href="hunt.html" aria-label="Охота на призраков">
     <img src="hunt.png" alt="">
-    <h2>Охота на призраков</h2>
-    <p>Кто найдёт всех первым?</p>
+    <h2 id="t-hunt-title">Охота на призраков</h2>
+    <p id="t-hunt-desc">Кто найдёт всех первым?</p>
   </a>
 
-  <a class="card" href="bingo.html">
+  <a class="card" href="bingo.html" aria-label="Halloween Bingo">
     <img src="bingo.png" alt="">
-    <h2>Halloween Bingo</h2>
-    <p>Весёлая игра для всей компании.</p>
+    <h2 id="t-bingo-title">Halloween Bingo</h2>
+    <p id="t-bingo-desc">Весёлая игра для всей компании.</p>
   </a>
 
-  <a class="card" href="padlock.html">
+  <a class="card" href="padlock.html" aria-label="Замок с секретом">
     <img src="padlock.png" alt="">
-    <h2>Замок с секретом</h2>
-    <p>Проверь, насколько ты наблюдателен!</p>
+    <h2 id="t-lock-title">Замок с секретом</h2>
+    <p id="t-lock-desc">Проверь, насколько ты наблюдателен!</p>
   </a>
 </div>
 
-<footer>© Halloween Night, 2025</footer>
+<footer id="t-footer">© Halloween Night, 2025</footer>
 
 <!-- Модалка -->
-<div id="modal">
+<div id="modal" role="dialog" aria-modal="true" aria-labelledby="t-modal-title">
   <div class="modal-box">
-    <h3>🏚 Войти в Мистический дом</h3>
-    <p>Выберите, с чего начать:</p>
+    <h3 id="t-modal-title">🏚 Войти в Мистический дом</h3>
+    <p id="t-modal-lead">Выберите, с чего начать:</p>
     <div class="modal-buttons">
-      <a href="team.html">🔮 Пройти распределение</a>
-      <a href="host.html">🚪 Войти в дом</a>
+      <a id="t-modal-assign" href="team.html">🔮 Пройти распределение</a>
+      <a id="t-modal-enter" href="host.html">🚪 Войти в дом</a>
     </div>
-    <p style="margin-top:20px;font-size:13px;color:#999;">(Рекомендуется начать с распределения)</p>
+    <p id="t-modal-note" style="margin-top:20px;font-size:13px;color:#999;">(Рекомендуется начать с распределения)</p>
   </div>
 </div>
 
 <script>
-const modal=document.getElementById('modal');
-document.getElementById('mysteryHouse').addEventListener('click',()=>{
-  modal.style.display='flex';
-});
-modal.addEventListener('click',e=>{
-  if(e.target===modal){modal.style.display='none';}
-});
+/* ---------- i18n словарь ---------- */
+const I18N = {
+  ru: {
+    title:'🎃 Halloween Night',
+    subtitle:'Выберите активность, которую хотите пройти этой ночью. Каждый выбор открывает новую историю...',
+    houseTitle:'Мистический дом',
+    houseDesc:'Командный квест с загадками и тайнами.',
+    huntTitle:'Охота на призраков',
+    huntDesc:'Кто найдёт всех первым?',
+    bingoTitle:'Halloween Bingo',
+    bingoDesc:'Весёлая игра для всей компании.',
+    lockTitle:'Замок с секретом',
+    lockDesc:'Проверь, насколько ты наблюдателен!',
+    modalTitle:'🏚 Войти в Мистический дом',
+    modalLead:'Выберите, с чего начать:',
+    modalAssign:'🔮 Пройти распределение',
+    modalEnter:'🚪 Войти в дом',
+    modalNote:'(Рекомендуется начать с распределения)',
+    footer:'© Halloween Night, 2025',
+  },
+  es: {
+    title:'🎃 Noche de Halloween',
+    subtitle:'Elige la actividad que quieres vivir esta noche. Cada elección abre una nueva historia…',
+    houseTitle:'Casa Misteriosa',
+    houseDesc:'Juego por equipos con acertijos y secretos.',
+    huntTitle:'Caza de Fantasmas',
+    huntDesc:'¿Quién los encontrará primero?',
+    bingoTitle:'Bingo de Halloween',
+    bingoDesc:'Un juego divertido para toda la familia.',
+    lockTitle:'Candado con Secreto',
+    lockDesc:'¡Pon a prueba tu atención!',
+    modalTitle:'🏚 Entrar en la Casa Misteriosa',
+    modalLead:'Elige por dónde empezar:',
+    modalAssign:'🔮 Pasar la Asignación de Equipos',
+    modalEnter:'🚪 Entrar en la Casa',
+    modalNote:'(Se recomienda empezar por la asignación)',
+    footer:'© Noche de Halloween, 2025',
+  }
+};
+
+/* ---------- применение перевода ---------- */
+function applyLang(lang){
+  const t = I18N[lang] || I18N.ru;
+  document.documentElement.lang = lang;
+
+  // основные тексты
+  $('#t-title').textContent = t.title;
+  $('#t-subtitle').textContent = t.subtitle;
+  $('#t-house-title').textContent = t.houseTitle;
+  $('#t-house-desc').textContent = t.houseDesc;
+  $('#t-hunt-title').textContent = t.huntTitle;
+  $('#t-hunt-desc').textContent = t.huntDesc;
+  $('#t-bingo-title').textContent = t.bingoTitle;
+  $('#t-bingo-desc').textContent = t.bingoDesc;
+  $('#t-lock-title').textContent = t.lockTitle;
+  $('#t-lock-desc').textContent = t.lockDesc;
+  $('#t-footer').textContent = t.footer;
+
+  // модалка
+  $('#t-modal-title').textContent = t.modalTitle;
+  $('#t-modal-lead').textContent = t.modalLead;
+  $('#t-modal-assign').textContent = t.modalAssign;
+  $('#t-modal-enter').textContent = t.modalEnter;
+  $('#t-modal-note').textContent = t.modalNote;
+
+  // подпись в селекте
+  $('#lang').value = lang;
+  localStorage.setItem('hn_lang', lang);
+}
+
+/* ---------- утилита $ ---------- */
+function $(sel){ return document.querySelector(sel); }
+
+/* ---------- модалка ---------- */
+const modal = $('#modal');
+$('#mysteryHouse').addEventListener('click',()=>{ modal.style.display='flex'; });
+$('#mysteryHouse').addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); modal.style.display='flex'; }});
+modal.addEventListener('click',e=>{ if(e.target===modal){ modal.style.display='none'; }});
+
+/* ---------- обработчик языка ---------- */
+const saved = localStorage.getItem('hn_lang') || 'ru';
+applyLang(saved);
+$('#lang').addEventListener('change', e=> applyLang(e.target.value));
 </script>
 
 </body>
