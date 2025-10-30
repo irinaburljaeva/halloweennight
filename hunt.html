@@ -1,0 +1,61 @@
+<!doctype html><html lang="ru"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Halloween Hunt</title>
+<style>
+body{font-family:system-ui,Arial;background:#0b0b10;color:#fff;padding:18px}
+.card{max-width:720px;margin:auto;background:#14141d;border:1px solid #2a2a3a;border-radius:16px;padding:20px}
+h1{margin:0 0 12px} .tag{display:inline-block;padding:4px 10px;border:1px solid #444;border-radius:999px;font-size:12px;opacity:.8}
+.task{font-size:20px;line-height:1.35;margin:16px 0} button{padding:10px 16px;border:0;border-radius:10px;background:#FFBA08;color:#000;font-weight:700}
+ul{padding-left:18px} li.done{color:#6ee7a6;text-decoration:line-through}
+footer{opacity:.7;margin-top:14px;font-size:12px}
+</style>
+<div class="card">
+  <h1>🎃 Trick-or-Treat Hunt</h1>
+  <div id="content"></div>
+  <hr>
+  <h3>Прогресс</h3>
+  <ul id="list"></ul>
+  <footer>Совет: расклей QR в разных комнатах. Когда всё собрано — покажи экран ведущему за приз!</footer>
+</div>
+<script>
+const ALL = {
+  bat:{title:"Летучая мышь", task:"Найди и принеси что-нибудь ЧЁРНОЕ. Скажи «Trick or Treat!» шёпотом."},
+  witch:{title:"Ведьма", task:"Изобрази хохот ведьмы 5 секунд и сделай круг метлой (или палкой)."},
+  pumpkin:{title:"Тыква", task:"Найди предмет оранжевого цвета и станцуй 10 секунд под хлопки."},
+  ghost:{title:"Призрак", task:"Накройся простынёй/платком на 3 секунды и скажи «Бу!»."},
+  spider:{title:"Паук", task:"Сделай «паучьи» шаги на четвереньках до двери и обратно."},
+  potion:{title:"Зелье", task:"Принеси 3 «ингредиента» (любыe безопасные мелочи). Скажи «Зелье готово!»"}
+};
+const id = new URLSearchParams(location.search).get('id');
+const key="huntProgress";
+const saved = JSON.parse(localStorage.getItem(key)||"{}");
+const list = document.getElementById('list');
+function renderList(){
+  list.innerHTML='';
+  Object.keys(ALL).forEach(k=>{
+    const li=document.createElement('li');
+    li.textContent=ALL[k].title;
+    if(saved[k]) li.className='done';
+    list.appendChild(li);
+  });
+  if(Object.keys(ALL).every(k=>saved[k])){
+    const li=document.createElement('li');
+    li.innerHTML="<b>✅ Все задания выполнены! Пароль: <code>HALLOWEEN</code></b>";
+    list.appendChild(li);
+  }
+}
+function screen(taskHtml){
+  document.getElementById('content').innerHTML=taskHtml;
+}
+if(id && ALL[id]){
+  screen(`<span class="tag">Метка: ${ALL[id].title}</span>
+  <div class="task">${ALL[id].task}</div>
+  <button id="done">Задание выполнено</button>`);
+  document.addEventListener('click',e=>{
+    if(e.target.id==='done'){ saved[id]=true; localStorage.setItem(key,JSON.stringify(saved)); renderList();
+      screen(`<div class="task">Отлично! Метка <b>${ALL[id].title}</b> засчитана ✅</div>`);}
+  });
+}else{
+  screen(`<div class="task">Сканируй QR-метки в комнатах. Подсказка: bat, witch, pumpkin, ghost, spider, potion.</div>`);
+}
+renderList();
+</script>
