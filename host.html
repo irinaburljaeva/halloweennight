@@ -90,12 +90,15 @@
       </div>
     </section>
 
-    <!-- Алхимик -->
+    <!-- Лаборатория алхимика -->
     <section id="room2" class="card hidden">
       <div class="card-header"><img src="alchemy.png" alt="" /></div>
       <div class="card-body">
-        <h2 data-text="r2Title">Лаборатория алхимика</h2>
-        <p data-text="r2Text">Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления.</p>
+        <h2 data-text="r2Title">Лаборатория алхимика — «Осеннее тепло»</h2>
+        <p data-text="r2Text">
+          Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления.
+          Когда ведущая попробует и одобрит — подтвердите.
+        </p>
         <ul>
           <li data-text="r2i1">Кружка горячего чая.</li>
           <li data-text="r2i2">Добавьте горсть ягод или ложку варенья.</li>
@@ -124,7 +127,7 @@
       </div>
     </section>
 
-    <!-- Финальная дверь -->
+    <!-- Последняя дверь -->
     <section id="room4" class="card hidden">
       <div class="card-header"><img src="door.png" alt="" /></div>
       <div class="card-body">
@@ -163,6 +166,7 @@
     const $$=s=>Array.from(document.querySelectorAll(s));
     const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
     const load=(k,d=null)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch{return d}};
+    const norm = s => (s||'').toLowerCase().replace('ё','е').trim();
 
     // ===== i18n =====
     const LKEY='hn_lang';
@@ -172,6 +176,7 @@
       return localStorage.getItem(LKEY) || 'ru';
     }
     let LANG = getLang();
+
     const i18n = {
       ru:{
         title:'Таинственный дом — Командный квест',
@@ -183,8 +188,8 @@
         r1Find:'Найдите и соберите перед собой эти 5 предметов (в любом порядке):',
         collected:'Предметы собраны', r1Hint:'Сложите первые буквы предметов, чтобы получить пароль к следующей комнате.',
         check:'Проверить',
-        r2Title:'Лаборатория алхимика',
-        r2Text:'Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления.',
+        r2Title:'Лаборатория алхимика — «Осеннее тепло»',
+        r2Text:'Сияют колбы, пахнет порошками и травами. На стене проступают строки рецепта — дом ждёт совместного приготовления. Когда ведущая попробует и одобрит — подтвердите.',
         r2i1:'Кружка горячего чая.', r2i2:'Добавьте горсть ягод или ложку варенья.', r2i3:'Размешайте чайную ложку мёда.',
         r2i4:'Щепотка корицы или имбиря.', r2i5:'По желанию — немного молока.',
         leaderConfirms:'Ведущая подтверждает',
@@ -211,8 +216,8 @@
         r1Find:'Encontrad y poned delante estos 5 objetos (en cualquier orden):',
         collected:'Objetos reunidos', r1Hint:'Tomad las primeras letras de los objetos para obtener la contraseña de la siguiente sala.',
         check:'Verificar',
-        r2Title:'Laboratorio del alquimista',
-        r2Text:'Brillan los frascos; huele a polvos y hierbas. En la pared aparece una receta: la casa quiere que la preparéis juntos.',
+        r2Title:'Laboratorio del alquimista — «Calor de Otoño»',
+        r2Text:'Brillan los frascos; huele a polvos y hierbas. En la pared aparece una receta: la casa quiere que la preparéis juntos. Cuando la anfitriona lo pruebe y lo apruebe, confirmad.',
         r2i1:'Una taza de té caliente.', r2i2:'Añadid un puñado de bayas o una cucharada de mermelada.',
         r2i3:'Disolved una cucharadita de miel.', r2i4:'Una pizca de canela o jengibre.', r2i5:'Opcional: un poco de leche.',
         leaderConfirms:'Confirma la anfitriona',
@@ -231,7 +236,7 @@
       }
     };
 
-    const applyI18n=()=>{
+    function applyI18n(){
       $('#langSelect').value = LANG;
       $$('[data-text]').forEach(el=>{
         const key=el.getAttribute('data-text');
@@ -239,31 +244,51 @@
       });
       // placeholders
       const r1input = $('#r1-input'); if(r1input){ r1input.placeholder = LANG==='es'?'Introduce la contraseña':'Введите пароль'; }
-      // Библиотека: список предметов (RU с ES в скобках)
-      const items = [
-        'Игрушка (juguete)',
-        'Носок (calcetín)',
-        'Альбом (álbum)',
-        'Галстук (corbata)',
-        'Кружка (taza)'
-      ];
-      const ul = $('#r1-list');
-      if(ul && ul.children.length===0){
-        // при первом заходе наполним; при последующих — наполняет buildR1()
-        items.forEach(x=>{ const li=document.createElement('li'); li.textContent=x; ul.appendChild(li); });
-      }
-    };
-
-    // ===== команда (плашка) =====
-    const team = load('hn_team',null);
-    const teamPill = $('#teamPill');
-    if(team){
-      teamPill.classList.remove('hidden');
-      teamPill.textContent = team==='ghost' ? '👻 ПРИЗРАКИ' : '🎯 ОХОТНИКИ';
-      teamPill.classList.add(team==='ghost'?'team-ghost':'team-hunter');
     }
 
-    // ===== библиотека: перемешивание и логика =====
+    // ===== команда из распределения (нормализация) =====
+    function normalizeTeam(raw){
+      if(!raw) return null;
+      const v=String(raw).toLowerCase();
+      if(v==='ghost'||v==='ghosts') return 'ghost';
+      if(v==='hunter'||v==='hunters') return 'hunter';
+      return null;
+    }
+    function readTeam(){
+      const fromQuery = new URLSearchParams(location.search).get('team');
+      let fromLs = null;
+      try{ fromLs = JSON.parse(localStorage.getItem('hn_team')); }catch{ fromLs = localStorage.getItem('hn_team'); }
+      const normVal = normalizeTeam(fromQuery || fromLs);
+      if(normVal) localStorage.setItem('hn_team', JSON.stringify(normVal));
+      return normVal;
+    }
+    function applyTeamPill(team){
+      const pill = $('#teamPill');
+      if(!team){ pill.classList.add('hidden'); pill.textContent=''; pill.classList.remove('team-ghost','team-hunter'); return; }
+      pill.classList.remove('hidden');
+      if(team==='ghost'){
+        pill.textContent = (LANG==='es')?'👻 FANTASMAS':'👻 ПРИЗРАКИ';
+        pill.classList.add('team-ghost'); pill.classList.remove('team-hunter');
+      }else{
+        pill.textContent = (LANG==='es')?'🎯 CAZADORES':'🎯 ОХОТНИКИ';
+        pill.classList.add('team-hunter'); pill.classList.remove('team-ghost');
+      }
+    }
+    function setFinalTeamLabel(){
+      const t = readTeam();
+      const el = $('#finalTeam');
+      if(!el) return;
+      if(t){
+        el.textContent = (LANG==='es'?'Equipo: ':'Команда: ') + (t==='ghost' ? (LANG==='es'?'FANTASMAS':'ПРИЗРАКИ') : (LANG==='es'?'CAZADORES':'ОХОТНИКИ'));
+      }else{
+        el.textContent = '';
+      }
+    }
+
+    const team = readTeam();
+    applyTeamPill(team);
+
+    // ===== библиотека: список и перемешивание =====
     function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
     function buildR1(){
       const src = [
@@ -307,7 +332,6 @@
       $('#r1-input').focus();
     });
 
-    const norm = s => (s||'').toLowerCase().replace('ё','е').trim();
     $('#r1-check').addEventListener('click',()=>{
       const v = norm($('#r1-input').value);
       const ok = (v==='книга' || v==='libro');
@@ -324,6 +348,7 @@
 
     // ===== долгий тап подтверждения (2 сек), без подсказок в тексте =====
     function longPress(el, cb){
+      if(!el) return;
       let t; let down=false;
       const start=()=>{ if(down) return; down=true; t=setTimeout(()=>{ cb(); down=false; },2000); };
       const end=()=>{ if(t){clearTimeout(t); t=null;} down=false; };
@@ -349,12 +374,7 @@
       });
       if(ok){
         save('hn_progress',4);
-        const t = load('hn_team',null);
-        if(t){
-          $('#finalTeam').textContent = (LANG==='es'?'Equipo: ':'Команда: ') + (t==='ghost' ? (LANG==='es'?'FANTASMAS':'ПРИЗРАКИ') : (LANG==='es'?'CAZADORES':'ОХОТНИКИ'));
-        } else {
-          $('#finalTeam').textContent = '';
-        }
+        setFinalTeamLabel();
         showSection('final');
       }else{
         $('#r4-msg').textContent = LANG==='es' ? 'Hay errores. Pensad juntos e intentad de nuevo.' : 'Есть ошибки. Обсудите вместе и попробуйте ещё раз.';
@@ -364,7 +384,6 @@
     // ===== восстановление прогресса =====
     (function restore(){
       // язык
-      $('#langSelect').value = LANG;
       applyI18n();
 
       const p = load('hn_progress',0);
@@ -374,10 +393,7 @@
       else if(p===2){ showSection('room3'); }
       else if(p===3){ showSection('room4'); }
       else if(p>=4){
-        const t = load('hn_team',null);
-        if(t){
-          $('#finalTeam').textContent = (LANG==='es'?'Equipo: ':'Команда: ') + (t==='ghost' ? (LANG==='es'?'FANTASMAS':'ПРИЗРАКИ') : (LANG==='es'?'CAZADORES':'ОХОТНИКИ'));
-        }
+        setFinalTeamLabel();
         showSection('final');
       }
     })();
@@ -386,12 +402,9 @@
     $('#langSelect').addEventListener('change',()=>{
       LANG = $('#langSelect').value;
       localStorage.setItem(LKEY, LANG);
-      // перерисовать тексты
+      applyTeamPill(readTeam());
       applyI18n();
     });
-
-    // первичная отрисовка i18n (на случай мгновенной смены)
-    applyI18n();
   </script>
 </body>
 </html>
