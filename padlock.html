@@ -1,0 +1,24 @@
+<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Кодовый замок</title>
+<style>body{display:grid;place-items:center;min-height:100dvh;background:#0f0f14;color:#fff;font-family:system-ui}
+.box{background:#181824;padding:24px;border-radius:16px;border:1px solid #2a2a3a;text-align:center}
+input{font-size:28px;letter-spacing:.3em;text-align:center;padding:8px 12px;border-radius:10px;border:1px solid #444;background:#111;color:#fff}
+button{margin-top:10px;padding:10px 14px;border:0;border-radius:10px;background:#FFBA08;color:#000;font-weight:700}
+.msg{margin-top:10px;min-height:1.6em}
+</style>
+<div class="box">
+  <h1>🔒 Введите код</h1>
+  <input id="code" maxlength="4" inputmode="numeric" placeholder="____">
+  <button onclick="check()">Открыть</button>
+  <div class="msg" id="msg"></div>
+</div>
+<script>
+const SECRET="7421"; // поменяй под свой квест
+function check(){
+  const v=document.getElementById('code').value.trim();
+  const msg=document.getElementById('msg');
+  if(v===SECRET){msg.innerHTML="✅ Открыто! Под столом — сундук с конфетами."; confetti()}
+  else msg.textContent="❌ Неверно. Ищи подсказки в комнате!";
+}
+function confetti(){let i=0;const c=setInterval(()=>{document.body.style.background=i%2?'#1b1b29':'#0f0f14';i++;if(i>8)clearInterval(c)},120)}
+</script>
