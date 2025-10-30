@@ -1,61 +1,236 @@
-<!doctype html><html lang="ru"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Halloween Hunt</title>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trick-or-Treat Hunt</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-body{font-family:system-ui,Arial;background:#0b0b10;color:#fff;padding:18px}
-.card{max-width:720px;margin:auto;background:#14141d;border:1px solid #2a2a3a;border-radius:16px;padding:20px}
-h1{margin:0 0 12px} .tag{display:inline-block;padding:4px 10px;border:1px solid #444;border-radius:999px;font-size:12px;opacity:.8}
-.task{font-size:20px;line-height:1.35;margin:16px 0} button{padding:10px 16px;border:0;border-radius:10px;background:#FFBA08;color:#000;font-weight:700}
-ul{padding-left:18px} li.done{color:#6ee7a6;text-decoration:line-through}
-footer{opacity:.7;margin-top:14px;font-size:12px}
-</style>
-<div class="card">
-  <h1>🎃 Trick-or-Treat Hunt</h1>
-  <div id="content"></div>
-  <hr>
-  <h3>Прогресс</h3>
-  <ul id="list"></ul>
-  <footer>Совет: расклей QR в разных комнатах. Когда всё собрано — покажи экран ведущему за приз!</footer>
-</div>
-<script>
-const ALL = {
-  bat:{title:"Летучая мышь", task:"Найди и принеси что-нибудь ЧЁРНОЕ. Скажи «Trick or Treat!» шёпотом."},
-  witch:{title:"Ведьма", task:"Изобрази хохот ведьмы 5 секунд и сделай круг метлой (или палкой)."},
-  pumpkin:{title:"Тыква", task:"Найди предмет оранжевого цвета и станцуй 10 секунд под хлопки."},
-  ghost:{title:"Призрак", task:"Накройся простынёй/платком на 3 секунды и скажи «Бу!»."},
-  spider:{title:"Паук", task:"Сделай «паучьи» шаги на четвереньках до двери и обратно."},
-  potion:{title:"Зелье", task:"Принеси 3 «ингредиента» (любыe безопасные мелочи). Скажи «Зелье готово!»"}
-};
-const id = new URLSearchParams(location.search).get('id');
-const key="huntProgress";
-const saved = JSON.parse(localStorage.getItem(key)||"{}");
-const list = document.getElementById('list');
-function renderList(){
-  list.innerHTML='';
-  Object.keys(ALL).forEach(k=>{
-    const li=document.createElement('li');
-    li.textContent=ALL[k].title;
-    if(saved[k]) li.className='done';
-    list.appendChild(li);
-  });
-  if(Object.keys(ALL).every(k=>saved[k])){
-    const li=document.createElement('li');
-    li.innerHTML="<b>✅ Все задания выполнены! Пароль: <code>HALLOWEEN</code></b>";
-    list.appendChild(li);
+  :root{
+    --bg:#0d0f14; --panel:#171a21; --muted:#9aa4b2; --text:#e9eef5; --accent:#ffb703; --ok:#37d67a; --warn:#f25f5c;
   }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'Montserrat',sans-serif; color:var(--text);
+    background: radial-gradient(1200px 600px at 50% -10%, #1c212b 0%, #0d0f14 55%);
+  }
+  .wrap{max-width:960px;margin:28px auto;padding:0 16px}
+  header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
+  header h1{margin:0;font-weight:900;font-size:clamp(22px,5vw,40px)}
+  .lang{margin-left:auto}
+  select{background:#222733;border:1px solid #2d3442;color:#fff;border-radius:10px;padding:8px 10px}
+  .card{background:linear-gradient(180deg,#1a1f27 0%, #151922 100%);
+        border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:20px;margin-bottom:16px}
+  .hint{color:var(--muted);margin:8px 0 0}
+  .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+  .trophy{
+    border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:16px; background:#141821;
+    display:flex; flex-direction:column; gap:10px; position:relative; overflow:hidden;
+  }
+  .trophy h3{margin:0; font-size:18px}
+  .trophy .em{font-size:26px;margin-right:6px}
+  .badge{position:absolute;top:10px;right:10px;background:#222b38;color:#9fd7ff;
+         border:1px solid #2f3948;border-radius:999px;padding:4px 10px;font-size:12px}
+  .badge.done{background:#173222;border-color:#1e7c4e;color:#9ff4c7}
+  .btn{border:none;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#17130a}
+  .btn-dark{background:#242a35;color:#e9eef5;border:1px solid #2e3440}
+  .btn-ghost{background:transparent;color:#a7b1c2;border:1px dashed #3a4353}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .thumb{width:100%;height:140px;background:#0f1218;border:1px solid #252b36;border-radius:12px;
+        background-position:center;background-size:cover}
+  .progress{display:flex;align-items:center;gap:10px;margin:10px 0 0}
+  .bar{height:10px;background:#202531;border:1px solid #2b3240;border-radius:999px;overflow:hidden;flex:1}
+  .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb703,#ffd166)}
+  .ok{color:var(--ok);font-weight:800}
+  .muted{color:var(--muted)}
+  .tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+  .tools a{color:#8fb3ff;text-decoration:none}
+  footer{color:#6f7a89;text-align:center;margin:22px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎃 Trick-or-Treat Hunt</h1>
+    <div class="lang">
+      <select id="lang">
+        <option value="ru">Рус</option>
+        <option value="es">Esp</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="card">
+    <p id="lead" class="hint">
+      Сканируйте QR-метки или сделайте фото-доказательство находок. Соберите все трофеи!
+    </p>
+    <div class="progress">
+      <strong id="counter">0/6</strong>
+      <div class="bar"><span id="bar"></span></div>
+      <button id="showHost" class="btn btn-dark">Показать ведущей</button>
+      <button id="reset" class="btn btn-ghost">Сбросить</button>
+    </div>
+    <div class="tools hint" id="qrTips">
+      Быстрые QR-ссылки для печати: 
+      <a href="hunt.html?unlock=bat">bat</a> ·
+      <a href="hunt.html?unlock=witch">witch</a> ·
+      <a href="hunt.html?unlock=pumpkin">pumpkin</a> ·
+      <a href="hunt.html?unlock=ghost">ghost</a> ·
+      <a href="hunt.html?unlock=spider">spider</a> ·
+      <a href="hunt.html?unlock=potion">potion</a>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>© Halloween Night</footer>
+</div>
+
+<script>
+const $ = s=>document.querySelector(s);
+const LS_KEY='hh_trophies_v1';
+
+const DICT = {
+  ru:{
+    lead:"Сканируйте QR-метки или сделайте фото-доказательство находок. Соберите все трофеи!",
+    showHost:"Показать ведущей", reset:"Сбросить", done:"Найдено", hint:"Подсказка",
+    t:[
+      {id:'bat',    name:'Летучая мышь',  hint:'Посмотри туда, где темнее всего — под абажуром, занавеской или на пороге окна.', emoji:'🦇'},
+      {id:'witch',  name:'Ведьма',        hint:'Ищи следы шляпы, метлы или котла на кухне.', emoji:'🧙‍♀️'},
+      {id:'pumpkin',name:'Тыква',         hint:'Там, где свет теплее: возле свечи, гирлянды или чайника.', emoji:'🎃'},
+      {id:'ghost',  name:'Призрак',       hint:'Может прятаться в зеркале или за дверью шкафа.', emoji:'👻'},
+      {id:'spider', name:'Паук',          hint:'Высоко-высоко… на карнизе, в углу потолка или у рамок.', emoji:'🕷'},
+      {id:'potion', name:'Зелье',         hint:'Оглянись на кухню: пузырёк, банка с этикеткой, чай с корицей.', emoji:'🧪'}
+    ]
+  },
+  es:{
+    lead:"Escanea los códigos QR o haz una foto-prueba de lo que encuentres. ¡Reúne todos los trofeos!",
+    showHost:"Mostrar a la anfitriona", reset:"Reiniciar", done:"Encontrado", hint:"Pista",
+    t:[
+      {id:'bat',    name:'Murciélago',   hint:'Busca donde está más oscuro: bajo una lámpara o detrás de la cortina.', emoji:'🦇'},
+      {id:'witch',  name:'Bruja',        hint:'Sombrero, escoba o caldero… quizá en la cocina.', emoji:'🧙‍♀️'},
+      {id:'pumpkin',name:'Calabaza',     hint:'Donde haya luz cálida: cerca de velas o guirnaldas.', emoji:'🎃'},
+      {id:'ghost',  name:'Fantasma',     hint:'Puede ocultarse en el espejo o detrás del armario.', emoji:'👻'},
+      {id:'spider', name:'Araña',        hint:'Muy arriba: en la cornisa o en una esquina.', emoji:'🕷'},
+      {id:'potion', name:'Poción',       hint:'En la cocina: frasco con etiqueta, té con canela.', emoji:'🧪'}
+    ]
+  }
+};
+
+let lang = localStorage.getItem('hh_lang') || 'ru';
+$('#lang').value = lang;
+$('#lang').addEventListener('change', e=>{
+  lang = e.target.value;
+  localStorage.setItem('hh_lang', lang);
+  paint();
+});
+
+function loadState(){
+  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; }
 }
-function screen(taskHtml){
-  document.getElementById('content').innerHTML=taskHtml;
+function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+let state = loadState(); // {bat:{found:true, photo:'data:'}, ...}
+
+function unlockByQuery(){
+  const u = new URL(location.href);
+  const id = (u.searchParams.get('unlock')||'').toLowerCase();
+  if(!id) return;
+  state[id] = state[id] || {};
+  state[id].found = true;
+  saveState(state);
+  // очистим параметр, чтобы при перезагрузке не дублировало
+  u.searchParams.delete('unlock');
+  history.replaceState({},'',u.toString());
 }
-if(id && ALL[id]){
-  screen(`<span class="tag">Метка: ${ALL[id].title}</span>
-  <div class="task">${ALL[id].task}</div>
-  <button id="done">Задание выполнено</button>`);
-  document.addEventListener('click',e=>{
-    if(e.target.id==='done'){ saved[id]=true; localStorage.setItem(key,JSON.stringify(saved)); renderList();
-      screen(`<div class="task">Отлично! Метка <b>${ALL[id].title}</b> засчитана ✅</div>`);}
+unlockByQuery();
+
+function paint(){
+  const dict = DICT[lang];
+  $('#lead').textContent = dict.lead;
+  $('#showHost').textContent = dict.showHost;
+  $('#reset').textContent = dict.reset;
+
+  const grid = $('#grid'); grid.innerHTML='';
+  dict.t.forEach(item=>{
+    const s = state[item.id] || {};
+    const card = document.createElement('div');
+    card.className = 'trophy';
+    card.innerHTML = `
+      <span class="badge ${s.found?'done':''}">${s.found ? '✓ '+dict.done : '· · ·'}</span>
+      <div class="thumb" id="thumb-${item.id}" ${s.photo ? `style="background-image:url('${s.photo}')"`:''}></div>
+      <h3><span class="em">${item.emoji}</span>${item.name}</h3>
+      <p class="hint"><b>${dict.hint}:</b> ${item.hint}</p>
+      <div class="row">
+        <a class="btn btn-dark" href="hunt.html?unlock=${item.id}">🔓 QR/код</a>
+        <label class="btn btn-primary">
+          📷 Фото/камера
+          <input type="file" accept="image/*" capture="environment" data-id="${item.id}" style="display:none">
+        </label>
+        <button class="btn btn-ghost" data-clear="${item.id}">Очистить</button>
+      </div>
+    `;
+    grid.appendChild(card);
   });
-}else{
-  screen(`<div class="task">Сканируй QR-метки в комнатах. Подсказка: bat, witch, pumpkin, ghost, spider, potion.</div>`);
+  bindInputs();
+  updateProgress();
 }
-renderList();
+
+function bindInputs(){
+  document.querySelectorAll('input[type=file]').forEach(inp=>{
+    inp.addEventListener('change', async (e)=>{
+      const id = e.target.dataset.id;
+      const file = e.target.files[0];
+      if(!file) return;
+      const dataUrl = await fileToDataURL(file);
+      state[id] = state[id] || {};
+      state[id].photo = dataUrl;
+      state[id].found = true;
+      saveState(state);
+      const th = $('#thumb-'+id);
+      th.style.backgroundImage = `url('${dataUrl}')`;
+      th.classList.add('has');
+      updateProgress();
+    });
+  });
+  document.querySelectorAll('[data-clear]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const id = btn.getAttribute('data-clear');
+      if(state[id]){
+        delete state[id].photo;
+        delete state[id].found;
+      }
+      saveState(state);
+      paint();
+    });
+  });
+}
+
+function fileToDataURL(file){
+  return new Promise(res=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result);
+    r.readAsDataURL(file);
+  });
+}
+
+function updateProgress(){
+  const total = DICT[lang].t.length;
+  const done = Object.values(state).filter(x=>x && x.found).length;
+  $('#counter').textContent = `${done}/${total}`;
+  $('#bar').style.width = `${Math.round(done/total*100)}%`;
+}
+
+$('#reset').addEventListener('click', ()=>{
+  if(confirm('Сбросить прогресс охоты?')){ localStorage.removeItem(LS_KEY); state={}; paint(); }
+});
+$('#showHost').addEventListener('click', ()=>{
+  alert(lang==='ru'
+    ? 'Покажите миниатюры на карточках и счётчик найденных (вверху). Ведущая выдаёт приз!'
+    : 'Muestra las miniaturas en las tarjetas y el contador de hallazgos. ¡Premio del anfitrión!');
+});
+
+paint();
 </script>
+</body>
+</html>
