@@ -3,18 +3,20 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Trick-or-Treat Hunt</title>
+<title>Trick-or-Treat Photo Hunt</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+<!-- JSZip для экспорта ZIP -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <style>
   :root{
-    --bg:#0d0f14; --panel:#171a21; --muted:#9aa4b2; --text:#e9eef5; --accent:#ffb703; --ok:#37d67a; --warn:#f25f5c;
+    --bg:#0d0f14; --panel:#171a21; --muted:#9aa4b2; --text:#e9eef5; --accent:#ffb703; --ok:#37d67a;
   }
   *{box-sizing:border-box}
   body{
     margin:0; font-family:'Montserrat',sans-serif; color:var(--text);
     background: radial-gradient(1200px 600px at 50% -10%, #1c212b 0%, #0d0f14 55%);
   }
-  .wrap{max-width:960px;margin:28px auto;padding:0 16px}
+  .wrap{max-width:1000px;margin:28px auto;padding:0 16px}
   header{display:flex;align-items:center;gap:14px;margin-bottom:14px}
   header h1{margin:0;font-weight:900;font-size:clamp(22px,5vw,40px)}
   .lang{margin-left:auto}
@@ -23,12 +25,12 @@
         border:1px solid rgba(255,255,255,.10);border-radius:18px;padding:20px;margin-bottom:16px}
   .hint{color:var(--muted);margin:8px 0 0}
   .grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-  .trophy{
+  .task{
     border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:16px; background:#141821;
-    display:flex; flex-direction:column; gap:10px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; gap:12px; position:relative; overflow:hidden;
   }
-  .trophy h3{margin:0; font-size:18px}
-  .trophy .em{font-size:26px;margin-right:6px}
+  .task h3{margin:0; font-size:18px}
+  .task .em{font-size:24px;margin-right:6px}
   .badge{position:absolute;top:10px;right:10px;background:#222b38;color:#9fd7ff;
          border:1px solid #2f3948;border-radius:999px;padding:4px 10px;font-size:12px}
   .badge.done{background:#173222;border-color:#1e7c4e;color:#9ff4c7}
@@ -37,22 +39,20 @@
   .btn-dark{background:#242a35;color:#e9eef5;border:1px solid #2e3440}
   .btn-ghost{background:transparent;color:#a7b1c2;border:1px dashed #3a4353}
   .row{display:flex;gap:10px;flex-wrap:wrap}
-  .thumb{width:100%;height:140px;background:#0f1218;border:1px solid #252b36;border-radius:12px;
+  .thumb{width:100%;height:160px;background:#0f1218;border:1px solid #252b36;border-radius:12px;
         background-position:center;background-size:cover}
-  .progress{display:flex;align-items:center;gap:10px;margin:10px 0 0}
-  .bar{height:10px;background:#202531;border:1px solid #2b3240;border-radius:999px;overflow:hidden;flex:1}
+  .progress{display:flex;align-items:center;gap:10px;margin:10px 0 0;flex-wrap:wrap}
+  .bar{height:10px;background:#202531;border:1px solid #2b3240;border-radius:999px;overflow:hidden;flex:1;min-width:180px}
   .bar>span{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffb703,#ffd166)}
-  .ok{color:var(--ok);font-weight:800}
   .muted{color:var(--muted)}
   .tools{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
-  .tools a{color:#8fb3ff;text-decoration:none}
   footer{color:#6f7a89;text-align:center;margin:22px 0}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>🎃 Trick-or-Treat Hunt</h1>
+    <h1>📸 Trick-or-Treat Photo Hunt</h1>
     <div class="lang">
       <select id="lang">
         <option value="ru">Рус</option>
@@ -63,23 +63,19 @@
 
   <div class="card">
     <p id="lead" class="hint">
-      Сканируйте QR-метки или сделайте фото-доказательство находок. Соберите все трофеи!
+      Делайте фото-доказательства предметов и сцен из списка. Соберите всё — и покажите ведущей!
     </p>
     <div class="progress">
-      <strong id="counter">0/6</strong>
+      <strong id="counter">0/12</strong>
       <div class="bar"><span id="bar"></span></div>
       <button id="showHost" class="btn btn-dark">Показать ведущей</button>
+      <button id="exportZip" class="btn btn-dark">Экспорт → ZIP</button>
+      <button id="exportHtml" class="btn btn-dark">Экспорт → HTML-альбом</button>
       <button id="reset" class="btn btn-ghost">Сбросить</button>
     </div>
-    <div class="tools hint" id="qrTips">
-      Быстрые QR-ссылки для печати: 
-      <a href="hunt.html?unlock=bat">bat</a> ·
-      <a href="hunt.html?unlock=witch">witch</a> ·
-      <a href="hunt.html?unlock=pumpkin">pumpkin</a> ·
-      <a href="hunt.html?unlock=ghost">ghost</a> ·
-      <a href="hunt.html?unlock=spider">spider</a> ·
-      <a href="hunt.html?unlock=potion">potion</a>
-    </div>
+    <p class="hint" id="privacy">
+      Фото сохраняются локально на устройстве (внутри этой страницы). Можно экспортировать их для ведущей.
+    </p>
   </div>
 
   <div class="grid" id="grid"></div>
@@ -89,85 +85,86 @@
 
 <script>
 const $ = s=>document.querySelector(s);
-const LS_KEY='hh_trophies_v1';
+const LS_KEY='hn_photo_hunt_v1';
 
 const DICT = {
   ru:{
-    lead:"Сканируйте QR-метки или сделайте фото-доказательство находок. Соберите все трофеи!",
-    showHost:"Показать ведущей", reset:"Сбросить", done:"Найдено", hint:"Подсказка",
-    t:[
-      {id:'bat',    name:'Летучая мышь',  hint:'Посмотри туда, где темнее всего — под абажуром, занавеской или на пороге окна.', emoji:'🦇'},
-      {id:'witch',  name:'Ведьма',        hint:'Ищи следы шляпы, метлы или котла на кухне.', emoji:'🧙‍♀️'},
-      {id:'pumpkin',name:'Тыква',         hint:'Там, где свет теплее: возле свечи, гирлянды или чайника.', emoji:'🎃'},
-      {id:'ghost',  name:'Призрак',       hint:'Может прятаться в зеркале или за дверью шкафа.', emoji:'👻'},
-      {id:'spider', name:'Паук',          hint:'Высоко-высоко… на карнизе, в углу потолка или у рамок.', emoji:'🕷'},
-      {id:'potion', name:'Зелье',         hint:'Оглянись на кухню: пузырёк, банка с этикеткой, чай с корицей.', emoji:'🧪'}
+    lead:"Делайте фото-доказательства предметов и сцен из списка. Соберите всё — и покажите ведущей!",
+    showHost:"Показать ведущей", reset:"Сбросить", done:"Готово",
+    exportZip:"Экспорт → ZIP", exportHtml:"Экспорт → HTML-альбом",
+    privacy:"Фото сохраняются локально на устройстве. Для сдачи задания можно экспортировать альбом.",
+    tasks:[
+      {id:'pumpkin', name:'Тыква (или оранжевый предмет)', emoji:'🎃', tip:'Любая тыква, светильник или просто оранжевый предмет.'},
+      {id:'spider', name:'Паук/паутинка', emoji:'🕷', tip:'Игрушка, наклейка или самодельная паутина из ниток.'},
+      {id:'potion', name:'Зелье в стакане', emoji:'🧪', tip:'Красивый напиток/чай, выглядит как «зелье».'},
+      {id:'shadow', name:'Страшная тень на стене', emoji:'🕯', tip:'Сделайте тень от рук/маски на стене.'},
+      {id:'book', name:'Старая книга', emoji:'📖', tip:'Любая книга — лучше в тёплом свете.'},
+      {id:'door', name:'Заколдованная дверь', emoji:'🚪', tip:'Сфотографируйте любую дверь драматично.'},
+      {id:'team', name:'Команда целиком', emoji:'🧑‍🤝‍🧑', tip:'Все в кадре, можно с гримасами.'},
+      {id:'witch', name:'Колдовской кадр', emoji:'🧙‍♀️', tip:'Кто-то с «метлой», шляпой или позой ведьмы.'},
+      {id:'ghost', name:'Призрак', emoji:'👻', tip:'Плед/простыня или просто «призрачная» поза.'},
+      {id:'laugh', name:'Хохот ведьмы', emoji:'😈', tip:'Крупный план смешной/зловещей улыбки.'},
+      {id:'eyes', name:'Глаза в темноте', emoji:'👀', tip:'Две «точки» света или нарисованные глаза.'},
+      {id:'treat', name:'Сладость или гадость', emoji:'🍬', tip:'Фото любимой конфеты или импровизированного «зелья».'},
     ]
   },
   es:{
-    lead:"Escanea los códigos QR o haz una foto-prueba de lo que encuentres. ¡Reúne todos los trofeos!",
-    showHost:"Mostrar a la anfitriona", reset:"Reiniciar", done:"Encontrado", hint:"Pista",
-    t:[
-      {id:'bat',    name:'Murciélago',   hint:'Busca donde está más oscuro: bajo una lámpara o detrás de la cortina.', emoji:'🦇'},
-      {id:'witch',  name:'Bruja',        hint:'Sombrero, escoba o caldero… quizá en la cocina.', emoji:'🧙‍♀️'},
-      {id:'pumpkin',name:'Calabaza',     hint:'Donde haya luz cálida: cerca de velas o guirnaldas.', emoji:'🎃'},
-      {id:'ghost',  name:'Fantasma',     hint:'Puede ocultarse en el espejo o detrás del armario.', emoji:'👻'},
-      {id:'spider', name:'Araña',        hint:'Muy arriba: en la cornisa o en una esquina.', emoji:'🕷'},
-      {id:'potion', name:'Poción',       hint:'En la cocina: frasco con etiqueta, té con canela.', emoji:'🧪'}
+    lead:"Haz fotos-prueba de los objetos y escenas de la lista. ¡Reúne todo y enséñalo a la anfitriona!",
+    showHost:"Mostrar a la anfitriona", reset:"Reiniciar", done:"Hecho",
+    exportZip:"Exportar → ZIP", exportHtml:"Exportar → Álbum HTML",
+    privacy:"Las fotos se guardan localmente en tu dispositivo. Puedes exportarlas como álbum para entregarlas.",
+    tasks:[
+      {id:'pumpkin', name:'Calabaza (o algo naranja)', emoji:'🎃', tip:'Cualquier calabaza u objeto naranja.'},
+      {id:'spider', name:'Araña/telaraña', emoji:'🕷', tip:'Juguete, pegatina o telaraña casera.'},
+      {id:'potion', name:'Poción en un vaso', emoji:'🧪', tip:'Bebida/té que parezca poción.'},
+      {id:'shadow', name:'Sombra tenebrosa en la pared', emoji:'🕯', tip:'Sombras de manos o máscara.'},
+      {id:'book', name:'Libro antiguo', emoji:'📖', tip:'Cualquier libro con luz cálida.'},
+      {id:'door', name:'Puerta encantada', emoji:'🚪', tip:'Cualquier puerta con pose dramática.'},
+      {id:'team', name:'Equipo completo', emoji:'🧑‍🤝‍🧑', tip:'Todos en el encuadre.'},
+      {id:'witch', name:'Toma de bruja', emoji:'🧙‍♀️', tip:'Sombrero/escoba o pose de bruja.'},
+      {id:'ghost', name:'Fantasma', emoji:'👻', tip:'Sábana o pose fantasmal.'},
+      {id:'laugh', name:'Risa malvada', emoji:'😈', tip:'Primer plano de risa/sonrisa.'},
+      {id:'eyes', name:'Ojos en la oscuridad', emoji:'👀', tip:'Dos puntos de luz o ojos dibujados.'},
+      {id:'treat', name:'Truco o trato', emoji:'🍬', tip:'Dulce favorito o “poción”.'},
     ]
   }
 };
 
-let lang = localStorage.getItem('hh_lang') || 'ru';
+let lang = localStorage.getItem('hn_lang') || 'ru';
 $('#lang').value = lang;
 $('#lang').addEventListener('change', e=>{
-  lang = e.target.value;
-  localStorage.setItem('hh_lang', lang);
-  paint();
+  lang = e.target.value; localStorage.setItem('hn_lang', lang); paint();
 });
 
-function loadState(){
-  try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; }
-}
-function saveState(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
-let state = loadState(); // {bat:{found:true, photo:'data:'}, ...}
-
-function unlockByQuery(){
-  const u = new URL(location.href);
-  const id = (u.searchParams.get('unlock')||'').toLowerCase();
-  if(!id) return;
-  state[id] = state[id] || {};
-  state[id].found = true;
-  saveState(state);
-  // очистим параметр, чтобы при перезагрузке не дублировало
-  u.searchParams.delete('unlock');
-  history.replaceState({},'',u.toString());
-}
-unlockByQuery();
+function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }catch{ return {}; } }
+function save(s){ localStorage.setItem(LS_KEY, JSON.stringify(s)); }
+let state = load(); // {id: {photo: dataURL}}
 
 function paint(){
-  const dict = DICT[lang];
-  $('#lead').textContent = dict.lead;
-  $('#showHost').textContent = dict.showHost;
-  $('#reset').textContent = dict.reset;
+  const d = DICT[lang];
+  $('#lead').textContent = d.lead;
+  $('#showHost').textContent = d.showHost;
+  $('#reset').textContent = d.reset;
+  $('#exportZip').textContent = d.exportZip;
+  $('#exportHtml').textContent = d.exportHtml;
+  $('#privacy').textContent = d.privacy;
 
   const grid = $('#grid'); grid.innerHTML='';
-  dict.t.forEach(item=>{
-    const s = state[item.id] || {};
+  d.tasks.forEach(t=>{
+    const s = state[t.id] || {};
     const card = document.createElement('div');
-    card.className = 'trophy';
+    card.className = 'task';
     card.innerHTML = `
-      <span class="badge ${s.found?'done':''}">${s.found ? '✓ '+dict.done : '· · ·'}</span>
-      <div class="thumb" id="thumb-${item.id}" ${s.photo ? `style="background-image:url('${s.photo}')"`:''}></div>
-      <h3><span class="em">${item.emoji}</span>${item.name}</h3>
-      <p class="hint"><b>${dict.hint}:</b> ${item.hint}</p>
+      <span class="badge ${s.photo?'done':''}">${s.photo ? '✓ '+d.done : '· · ·'}</span>
+      <div class="thumb" id="th-${t.id}" ${s.photo?`style="background-image:url('${s.photo}')"`:''}></div>
+      <h3><span class="em">${t.emoji}</span>${t.name}</h3>
+      <p class="hint">${t.tip}</p>
       <div class="row">
-        <a class="btn btn-dark" href="hunt.html?unlock=${item.id}">🔓 QR/код</a>
         <label class="btn btn-primary">
           📷 Фото/камера
-          <input type="file" accept="image/*" capture="environment" data-id="${item.id}" style="display:none">
+          <input type="file" accept="image/*" capture="environment" data-id="${t.id}" style="display:none">
         </label>
-        <button class="btn btn-ghost" data-clear="${item.id}">Очистить</button>
+        <button class="btn btn-ghost" data-clear="${t.id}">Очистить</button>
       </div>
     `;
     grid.appendChild(card);
@@ -183,24 +180,19 @@ function bindInputs(){
       const file = e.target.files[0];
       if(!file) return;
       const dataUrl = await fileToDataURL(file);
-      state[id] = state[id] || {};
-      state[id].photo = dataUrl;
-      state[id].found = true;
-      saveState(state);
-      const th = $('#thumb-'+id);
+      state[id] = {photo:dataUrl};
+      save(state);
+      const th = document.getElementById('th-'+id);
       th.style.backgroundImage = `url('${dataUrl}')`;
-      th.classList.add('has');
+      th.previousElementSibling?.classList?.add('done'); // badge
       updateProgress();
     });
   });
   document.querySelectorAll('[data-clear]').forEach(btn=>{
-    btn.addEventListener('click', e=>{
+    btn.addEventListener('click', ()=>{
       const id = btn.getAttribute('data-clear');
-      if(state[id]){
-        delete state[id].photo;
-        delete state[id].found;
-      }
-      saveState(state);
+      delete state[id];
+      save(state);
       paint();
     });
   });
@@ -215,19 +207,62 @@ function fileToDataURL(file){
 }
 
 function updateProgress(){
-  const total = DICT[lang].t.length;
-  const done = Object.values(state).filter(x=>x && x.found).length;
-  $('#counter').textContent = `${done}/${total}`;
-  $('#bar').style.width = `${Math.round(done/total*100)}%`;
+  const total = DICT[lang].tasks.length;
+  const done = Object.keys(state).length;
+  document.getElementById('counter').textContent = `${done}/${total}`;
+  document.getElementById('bar').style.width = `${Math.round(done/total*100)}%`;
 }
 
-$('#reset').addEventListener('click', ()=>{
-  if(confirm('Сбросить прогресс охоты?')){ localStorage.removeItem(LS_KEY); state={}; paint(); }
+document.getElementById('reset').addEventListener('click', ()=>{
+  if(confirm(lang==='ru'?'Сбросить фотографии и прогресс?':'¿Reiniciar fotos y progreso?')){
+    state = {}; save(state); paint();
+  }
 });
-$('#showHost').addEventListener('click', ()=>{
+
+document.getElementById('showHost').addEventListener('click', ()=>{
   alert(lang==='ru'
-    ? 'Покажите миниатюры на карточках и счётчик найденных (вверху). Ведущая выдаёт приз!'
-    : 'Muestra las miniaturas en las tarjetas y el contador de hallazgos. ¡Premio del anfitrión!');
+    ? 'Прокрутите карточки с миниатюрами — ведущая проверит, что все задания выполнены.'
+    : 'Desplaza las tarjetas con miniaturas: la anfitriona comprobará que todo esté hecho.');
+});
+
+document.getElementById('exportZip').addEventListener('click', async ()=>{
+  const zip = new JSZip();
+  const folder = zip.folder('photo-hunt') ;
+  let idx=1;
+  for(const t of DICT[lang].tasks){
+    const s = state[t.id];
+    if(s && s.photo){
+      const data = s.photo.split(',')[1];
+      folder.file(`${idx.toString().padStart(2,'0')}_${t.id}.png`, data, {base64:true});
+      idx++;
+    }
+  }
+  const blob = await zip.generateAsync({type:'blob'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'photo-hunt.zip';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('exportHtml').addEventListener('click', ()=>{
+  const d = DICT[lang];
+  let html = `<!DOCTYPE html><meta charset="utf-8"><title>Photo Hunt Album</title>
+  <style>body{font-family:Montserrat,Arial,sans-serif;background:#111;color:#eee;margin:20px}
+  .item{margin:0 0 18px}.item h3{margin:6px 0 8px}
+  img{max-width:100%;border-radius:12px;border:1px solid #333}</style>
+  <h1>Photo Hunt — ${new Date().toLocaleString()}</h1>`;
+  d.tasks.forEach(t=>{
+    const s = state[t.id];
+    if(s && s.photo){
+      html += `<div class="item"><h3>${t.emoji} ${t.name}</h3><img src="${s.photo}"></div>`;
+    }
+  });
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'photo-hunt-album.html'; a.click();
+  URL.revokeObjectURL(url);
 });
 
 paint();
