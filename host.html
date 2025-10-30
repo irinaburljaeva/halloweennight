@@ -1,0 +1,119 @@
+<!doctype html><html lang="ru"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Командное табло — Ночная Игра</title>
+<style>
+:root{--bg:#0a0a0f;--panel:#14141d;--line:#2b2b3a;--y:#FFBA08;--o:#CF2C02}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;color:#fff;background:var(--bg)}
+.wrap{max-width:1100px;margin:auto;padding:20px}
+h1{margin:0 0 8px} .row{display:flex;gap:16px;flex-wrap:wrap}
+.panel{flex:1 1 320px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+label{font-size:14px;opacity:.9}
+input,select,button,textarea{background:#0f0f16;color:#fff;border:1px solid #34344a;border-radius:10px;padding:10px}
+input,select{width:100%} textarea{width:100%; min-height:110px}
+button{cursor:pointer} .btn{background:var(--y);color:#000;border:0;font-weight:800}
+.score{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin-top:10px}
+.score .name{font-weight:700} .score .pts{font-size:20px}
+.kbd{display:inline-block;background:#0f0f16;border:1px solid #34344a;border-radius:6px;padding:2px 6px}
+.qr{display:grid;place-items:center;gap:8px}
+#qr1,#qr2{background:#0d0d14;padding:10px;border:1px solid #2a2a3a;border-radius:12px}
+.timer{font-size:34px;font-weight:800;letter-spacing:1px}
+.flex{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.small{opacity:.75;font-size:12px}
+</style>
+<div class="wrap">
+  <h1>Командный режим: <span style="opacity:.85">Ковен vs Охотники</span></h1>
+
+  <div class="row">
+    <section class="panel" style="flex:2 1 520px">
+      <h3>Задания раундов</h3>
+      <p class="small">Текущий раунд открывается кодом (3–6 символов). Команды вводят код у себя и видят это задание.</p>
+      <label>Код раунда</label>
+      <div class="flex"><input id="roundCode" placeholder="например: RAVEN"><button class="btn" id="startRound">Старт раунда</button>
+      <button id="stopRound">Стоп</button><span class="timer" id="t">00:00</span></div>
+      <label style="margin-top:10px">Текст задания</label>
+      <textarea id="roundTask" placeholder="Например: «Соберите 5 'ингредиентов зелья' и принесите их ведущему. Фото с ингредиентами — бонус +1»"></textarea>
+      <div class="small">Идеи: эстафета с метлой; найти 3 оранжевых предмета; «оживить» скелета (собрать пазл); шёпотом рассказать страшилку; построить башню из 10 пластиковых стаканов; синхронный танец 15 сек.</div>
+    </section>
+
+    <section class="panel">
+      <h3>Команды и вход по QR</h3>
+      <div class="flex"><input id="team1" value="Ковен"><input id="team2" value="Охотники"></div>
+      <div class="row">
+        <div class="qr" style="flex:1 1 200px">
+          <div id="qr1"></div><div class="small" id="link1"></div><button id="gen1">QR для команды 1</button>
+        </div>
+        <div class="qr" style="flex:1 1 200px">
+          <div id="qr2"></div><div class="small" id="link2"></div><button id="gen2">QR для команды 2</button>
+        </div>
+      </div>
+      <div class="small">Совет: покажите на ТВ только QR своей команды, чтобы делились на группы.</div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h3>Табло</h3>
+    <div id="board"></div>
+  </section>
+</div>
+
+<script>
+/* Мини QR (встроенная укороченная версия qrcode.js, как на главной) */
+!function(o){function t(o){this.mode=l.MODE_8BIT_BYTE,this.data=o,this.parsedData=[];for(var t=0,r=this.data.length;t<r;t++){var e=[],n=this.data.charCodeAt(t);n>65536?(e[0]=240|(1835008&n)>>>18,e[1]=128|(258048&n)>>>12,e[2]=128|(4032&n)>>>6,e[3]=128|63&n):n>2048?(e[0]=224|(61440&n)>>>12,e[1]=128|(4032&n)>>>6,e[2]=128|63&n):n>128?(e[0]=192|(1984&n)>>>6,e[1]=128|63&n):e[0]=n,this.parsedData.push(e)}this.parsedData=Array.prototype.concat.apply([],this.parsedData),this.getLength=function(){return this.parsedData.length},this.write=function(o){for(var t=0,r=this.parsedData.length;t<r;t++)o.put(this.parsedData[t],8)}}function r(o,t){this.typeNumber=o,this.errorCorrectLevel=t,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[],this.addData=function(o){this.dataList.push(new t(o))},this.isDark=function(o,t){if(null==this.modules[o][t])throw new Error(o+","+t);return this.modules[o][t]},this.getModuleCount=function(){return this.moduleCount},this.make=function(){this.makeImpl(!1,this.getBestMaskPattern())},this.makeImpl=function(o,t){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var r=0;r<this.moduleCount;r++)this.modules[r]=new Array(this.moduleCount);this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupTimingPattern(),this.setupTypeInfo(o,t),this.dataCache=this.createData(this.typeNumber,this.errorCorrectLevel,this.dataList),this.mapData(this.dataCache,t)},this.setupPositionProbePattern=function(o,t){for(var r=-1;r<=7;r++)if(!(o+r<=-1||this.moduleCount<=o+r))for(var e=-1;e<=7;e++)t+e<=-1||this.moduleCount<=t+e||(this.modules[o+r][t+e]=r>=0&&r<=6&&(0==e||6==e)||e>=0&&e<=6&&(0==r||6==r)||r>=2&&r<=4&&e>=2&&e<=4)},this.setupTimingPattern=function(){for(var o=8;o<this.moduleCount-8;o++)null==this.modules[o][6]&&(this.modules[o][6]=o%2==0),null==this.modules[6][o]&&(this.modules[6][o]=o%2==0)},this.setupTypeInfo=function(o,t){for(var r=l.getBCHTypeInfo(this.errorCorrectLevel<<3|t),e=0;e<15;e++){var n=!o&&1==(32768&r>>e);e<6?this.modules[e][8]=n:e<8?this.modules[e+1][8]=n:this.modules[this.moduleCount-15+e][8]=n}for(e=0;e<15;e++){n=!o&&1==(32768&r>>e);e<8?this.modules[8][this.moduleCount-e-1]=n:e<9?this.modules[8][15-e-1+1]=n:this.modules[8][15-e-1]=n}this.modules[this.moduleCount-8][8]=!o};var e,n,a=[[],[6,18],[6,22],[6,26],[6,30]];this.mapData=function(o,t){for(var r=-1,e=this.moduleCount-1,n=7,a=0,i=this.moduleCount-1;i>0;i-=2)for(6==i&&i--;;){for(var s=0;s<2;s++)null==this.modules[e][i-s]&&(this.modules[e][i-s]=1==(255&o[a>>>3]>>>7-(a&7)),a++);if((e+=r)<0||this.moduleCount<=e){e-=r,r=-r;break}}}}function e(o,t){for(var r=new r(o,t),e=0;e<arguments.length-2;e++)r.addData(arguments[e+2]);return r.make(),r}var l={};l.PAD0=236,l.PAD1=17,l.MODE_8BIT_BYTE=4,l.QRCodeModel=r,l.QR8bitByte=t,l.QRErrorCorrectLevel={L:1,M:0,Q:3,H:2},l.getBCHTypeInfo=function(o){for(var t=o<<10;l.getBCHDigit(t)-l.getBCHDigit(1335)>=0;)t^=1335<<l.getBCHDigit(t)-l.getBCHDigit(1335);return o<<10|t},l.getBCHDigit=function(o){var t=0;for(;0!=o;)t++,o>>>=1;return t},l.createStringToBytes=function(o){return function(t){for(var r=[],e=0;e<t.length;e++){var l=t.charCodeAt(e);r.push(l&255)}return r}}(""),o.QRCode=function(o,t){this._el=o,this._htOption=t},o.QRCode.prototype.makeCode=function(o){var t=new e(4,l.QRErrorCorrectLevel.M,o),r=t.getModuleCount(),n=document.createElement("canvas");n.width=n.height=260;var a=n.getContext("2d");a.fillStyle="#fff",a.fillRect(0,0,260,260),a.fillStyle="#000";for(var i=0;i<r;i++)for(var s=0;s<r;s++)t.isDark(i,s)&&a.fillRect(5+s*10,5+i*10,10,10);this._el.innerHTML="",this._el.appendChild(n)} }(window);
+/* ---------------------- /QR ----------------------- */
+
+const $=s=>document.querySelector(s);
+const teamInputs=[$('#team1'),$('#team2')];
+const board=$('#board');
+
+function buildBoard(){
+  board.innerHTML='';
+  const names=teamInputs.map(i=>i.value.trim());
+  names.forEach((name,idx)=>{
+    const row=document.createElement('div'); row.className='score';
+    row.innerHTML=`<div class="name">${name}</div>
+      <div class="pts" id="p${idx}">${getPts(idx)}</div>
+      <div>
+        <button onclick="addPts(${idx},1)">+1</button>
+        <button onclick="addPts(${idx},3)">+3</button>
+        <button onclick="addPts(${idx},-1)">−1</button>
+      </div>`;
+    board.appendChild(row);
+  });
+  saveNames(names);
+}
+function getPts(i){return +(localStorage.getItem('teamPts'+i)||0)}
+function addPts(i,d){localStorage.setItem('teamPts'+i, getPts(i)+d); $('#p'+i).textContent=getPts(i)}
+function saveNames(arr){localStorage.setItem('teamNames',JSON.stringify(arr))}
+(function init(){
+  const saved=JSON.parse(localStorage.getItem('teamNames')||'["Ковен","Охотники"]');
+  teamInputs.forEach((inp,i)=>{inp.value=saved[i]||inp.value; inp.oninput=buildBoard});
+  buildBoard();
+})();
+
+/* QR на вход команд */
+function base(path){return new URL(path, location.origin + location.pathname.replace(/[^/]*$/, "")).toString()}
+function mkQR(el,linkEl,path,team){
+  const url = base(`team.html?team=${encodeURIComponent(team)}&n=${Date.now()}`); // уникализация, чтобы телефоны не кешили
+  new QRCode(el, {text:url}); linkEl.textContent=url;
+}
+$('#gen1').onclick=()=>{mkQR(document.getElementById('qr1'), document.getElementById('link1'), 'team.html', teamInputs[0].value.trim())}
+$('#gen2').onclick=()=>{mkQR(document.getElementById('qr2'), document.getElementById('link2'), 'team.html', teamInputs[1].value.trim())}
+
+/* Раунды и таймер */
+let timer=null, startTs=0;
+function fmt(ms){const s=Math.max(0,Math.floor(ms/1000));return (""+Math.floor(s/60)).padStart(2,'0')+":"+(""+(s%60)).padStart(2,'0')}
+function broadcast(round){ // Передаем код/задание через «ручной» способ: команды вводят код, текст одинаковый (ведущий озвучивает)
+  localStorage.setItem('roundTask', round.task);
+  localStorage.setItem('roundCode', round.code);
+}
+$('#startRound').onclick=()=>{
+  const code=$('#roundCode').value.trim().toUpperCase();
+  const task=$('#roundTask').value.trim();
+  if(!code||!task){alert('Заполни код и текст задания');return}
+  broadcast({code,task});
+  startTs=Date.now(); $('#t').textContent='00:00';
+  timer&&clearInterval(timer);
+  timer=setInterval(()=>{$('#t').textContent=fmt(Date.now()-startTs)},500);
+}
+$('#stopRound').onclick=()=>{timer&&clearInterval(timer); $('#t').textContent='—'}
+</script>
