@@ -1,0 +1,37 @@
+<!doctype html><html lang="ru"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Команда — Ночная Игра</title>
+<style>
+:root{--bg:#0a0a0f;--panel:#14141d;--line:#2b2b3a;--y:#FFBA08}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;color:#fff;background:var(--bg)}
+.wrap{max-width:720px;margin:auto;padding:20px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
+h1{margin:0 0 6px} .team{opacity:.85;margin-bottom:10px}
+input,button{width:100%;padding:12px;border-radius:12px;border:1px solid #34344a;background:#0f0f16;color:#fff}
+button{margin-top:8px;background:var(--y);color:#000;border:0;font-weight:800;cursor:pointer}
+.task{margin-top:14px;padding:14px;border:1px dashed #3a3a4a;border-radius:12px;background:#0f0f16}
+.small{opacity:.75;font-size:12px}
+</style>
+<div class="wrap">
+  <div class="card">
+    <h1>Вход в раунд</h1>
+    <div class="team" id="teamName"></div>
+    <input id="code" placeholder="Код раунда (с ТВ)">
+    <button id="go">Открыть задание</button>
+    <div class="task" id="task" style="display:none"></div>
+    <p class="small">Подсказка: код меняется на каждый раунд. За выполнение показываетесь ведущему — он начислит очки на табло.</p>
+  </div>
+</div>
+<script>
+const q=new URLSearchParams(location.search); const name=q.get('team')||'Команда';
+document.getElementById('teamName').textContent='Команда: '+name;
+document.getElementById('go').onclick=()=>{
+  const code=(document.getElementById('code').value||'').trim().toUpperCase();
+  const expected=(localStorage.getItem('roundCode')||'').toUpperCase();
+  const task=localStorage.getItem('roundTask')||'Задание пока скрыто.';
+  if(!code){alert('Введите код раунда с экрана');return}
+  if(code!==expected){alert('Код не подтверждён. Сверьтесь с экраном.');return}
+  const box=document.getElementById('task'); box.style.display='block'; box.textContent=task;
+  window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'});
+}
+</script>
