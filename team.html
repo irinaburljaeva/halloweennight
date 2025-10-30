@@ -1,37 +1,219 @@
-<!doctype html><html lang="ru"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Команда — Ночная Игра</title>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Haunted Escape — Командный квест</title>
 <style>
-:root{--bg:#0a0a0f;--panel:#14141d;--line:#2b2b3a;--y:#FFBA08}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;color:#fff;background:var(--bg)}
-.wrap{max-width:720px;margin:auto;padding:20px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px}
-h1{margin:0 0 6px} .team{opacity:.85;margin-bottom:10px}
-input,button{width:100%;padding:12px;border-radius:12px;border:1px solid #34344a;background:#0f0f16;color:#fff}
-button{margin-top:8px;background:var(--y);color:#000;border:0;font-weight:800;cursor:pointer}
-.task{margin-top:14px;padding:14px;border:1px dashed #3a3a4a;border-radius:12px;background:#0f0f16}
-.small{opacity:.75;font-size:12px}
+  body {
+    margin:0;
+    padding:0;
+    font-family:"Georgia",serif;
+    background:#0d0d0d;
+    color:#f3e9d2;
+    overflow:hidden;
+  }
+  #game-container {
+    position:relative;
+    width:100vw;
+    height:100vh;
+    background-size:cover;
+    background-position:center;
+    transition:background-image 1s ease;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:40px;
+    box-sizing:border-box;
+  }
+  .text-box {
+    background:rgba(10,10,10,.82);
+    padding:22px;
+    border-radius:12px;
+    font-size:1.15em;
+    line-height:1.55;
+    max-width:760px;
+  }
+  .controls {
+    display:flex;
+    gap:14px;
+    align-items:center;
+    margin-top:14px;
+    flex-wrap:wrap;
+  }
+  .check {
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,.04);
+    border:1px solid rgba(255,255,255,.1);
+    padding:10px 12px;
+    border-radius:10px;
+  }
+  button {
+    background-color:#d4a373;
+    border:none;
+    color:#1a1a1a;
+    padding:12px 22px;
+    border-radius:9px;
+    font-size:1em;
+    cursor:pointer;
+    transition:filter .2s ease, opacity .2s ease;
+  }
+  button[disabled]{opacity:.55;cursor:not-allowed}
+  button:hover{filter:brightness(1.06)}
+  .fade-in{animation:fadeIn 1s ease forwards}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .badge{display:inline-block;font-size:.9em;opacity:.85;border:1px solid rgba(255,255,255,.18);
+    padding:4px 8px;border-radius:999px;margin-right:8px}
+  .room{opacity:.9}
+  #teamName{position:absolute;top:12px;left:12px;padding:6px 10px;border-radius:8px;
+    background:rgba(0,0,0,.45);font-size:.95em;opacity:.85}
 </style>
-<div class="wrap">
-  <div class="card">
-    <h1>Вход в раунд</h1>
-    <div class="team" id="teamName"></div>
-    <input id="code" placeholder="Код раунда (с ТВ)">
-    <button id="go">Открыть задание</button>
-    <div class="task" id="task" style="display:none"></div>
-    <p class="small">Подсказка: код меняется на каждый раунд. За выполнение показываетесь ведущему — он начислит очки на табло.</p>
+</head>
+<body>
+
+<div id="game-container">
+  <div id="teamName"></div>
+  <div id="text" class="text-box fade-in"></div>
+
+  <div class="controls">
+    <label class="check" id="confirm-wrap" style="display:none">
+      <input type="checkbox" id="confirm">
+      <span>Задание выполнено (честная игра!)</span>
+    </label>
+    <button id="next-btn">Дальше</button>
   </div>
 </div>
+
 <script>
-const q=new URLSearchParams(location.search); const name=q.get('team')||'Команда';
-document.getElementById('teamName').textContent='Команда: '+name;
-document.getElementById('go').onclick=()=>{
-  const code=(document.getElementById('code').value||'').trim().toUpperCase();
-  const expected=(localStorage.getItem('roundCode')||'').toUpperCase();
-  const task=localStorage.getItem('roundTask')||'Задание пока скрыто.';
-  if(!code){alert('Введите код раунда с экрана');return}
-  if(code!==expected){alert('Код не подтверждён. Сверьтесь с экраном.');return}
-  const box=document.getElementById('task'); box.style.display='block'; box.textContent=task;
-  window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'});
+const params=new URLSearchParams(location.search);
+const team=params.get("team")||"Команда";
+document.getElementById("teamName").textContent="Команда: "+team;
+
+const scenes = [
+  {
+    bg: "intro.png",
+    lock: false,
+    text: `
+      <span class="badge">Ночь</span>
+      <strong>Добро пожаловать в Haunted Escape.</strong><br><br>
+      Свет мигает, и дверь за вами захлопывается. Чтобы выбраться, вы должны
+      выполнить задания <em>в реальной жизни</em>. Читайте вслух, действуйте вместе.
+      <br><br>Когда будете готовы — нажмите «Дальше».
+    `
+  },
+  {
+    bg: "library.png",
+    lock: true,
+    text: `
+      <span class="badge room">Комната 1 — Библиотека Шёпотов</span><br>
+      Между книгами — старая записка: «Собери три слова, чтобы проснулась дверь».
+      <br><br><strong>Задание:</strong><br>
+      Найдите <b>3 предмета</b>, которые начинаются на буквы <b>Т — Ы — К</b> (в любом порядке).
+      Сложите из них слово «ТЫК…» и покажите ведущему.
+      <br><em>Главное — фантазия и командная работа!</em>
+    `
+  },
+  {
+    bg: "alchemy.png",
+    lock: true,
+    text: `
+      <span class="badge room">Комната 2 — Лаборатория Алхимика</span><br>
+      На столе — колбы и пыльные банки. На стене надпись: «Сварите бодрость».
+      <br><br><strong>Задание:</strong><br>
+      Соберите «зелье бодрости» из <b>трёх предметов разных цветов</b>: 
+      оранжевого, чёрного и фиолетового. Сложите их вместе и произнесите 
+      <b>заклинание из 10 слов</b> — шёпотом.
+    `
+  },
+  {
+    bg: "mirrors.png",
+    lock: true,
+    text: `
+      <span class="badge room">Комната 3 — Зеркальный зал</span><br>
+      Отражения множатся. Чтобы пройти дальше, станьте «одним».
+      <br><br><strong>Задание:</strong><br>
+      Исполните <b>синхронный танец призраков</b> 15 секунд и замрите в одинаковой позе.
+      Снимите короткое видео для ведущего.
+    `
+  },
+  {
+    bg: "library.png",
+    lock: true,
+    text: `
+      <span class="badge room">Коридор Шёпотов</span><br>
+      Слышен голос: «История — ключ».
+      <br><br><strong>Задание:</strong><br>
+      Встаньте в круг. Первый придумывает <b>страшную историю из одного предложения</b> 
+      и шёпотом передаёт соседу. Каждый добавляет по слову. Когда история вернётся — 
+      произнесите её вслух. Запомните <b>первое слово</b>.
+    `
+  },
+  {
+    bg: "door.png",
+    lock: true,
+    text: `
+      <span class="badge room">Финальная дверь</span><br>
+      Над замком — табличка: «Скажи слово — и войди».
+      <br><br><strong>Задание:</strong><br>
+      Одновременно издайте <b>три разных звука</b> (ветер, скрип, шаги) и 
+      громко произнесите <b>первое слово вашей истории</b>. Если прозвучит синхронно — замок щёлкнет.
+    `
+  },
+  {
+    bg: "door.png",
+    lock: false,
+    text: `
+      Замок щёлкнул. Дверь открылась, и холодный воздух ворвался в комнату.
+      Вы выбрались из дома с привидениями.<br><br>
+      <strong>Поздравляем, команда ${team}!</strong><br>
+      Вы прошли квест до конца. 🎃
+    `
+  }
+];
+
+let currentScene = 0;
+const textElement = document.getElementById("text");
+const nextBtn = document.getElementById("next-btn");
+const confirmWrap = document.getElementById("confirm-wrap");
+const confirmBox = document.getElementById("confirm");
+const container = document.getElementById("game-container");
+
+function updateScene(){
+  const scene = scenes[currentScene];
+  container.style.backgroundImage = `url(${scene.bg})`;
+  textElement.innerHTML = scene.text;
+  textElement.classList.add("fade-in");
+  setTimeout(()=>textElement.classList.remove("fade-in"), 1000);
+
+  if(scene.lock){
+    confirmWrap.style.display = "inline-flex";
+    confirmBox.checked = false;
+    nextBtn.disabled = true;
+  } else {
+    confirmWrap.style.display = "none";
+    nextBtn.disabled = false;
+  }
+
+  nextBtn.textContent = currentScene < scenes.length - 1 ? "Дальше" : "Финиш";
 }
+
+confirmBox.addEventListener("change",()=>{
+  nextBtn.disabled = !confirmBox.checked;
+});
+
+nextBtn.addEventListener("click",()=>{
+  currentScene++;
+  if(currentScene < scenes.length){
+    updateScene();
+  } else {
+    nextBtn.style.display = "none";
+    confirmWrap.style.display = "none";
+  }
+});
+
+updateScene();
 </script>
+</body>
+</html>
