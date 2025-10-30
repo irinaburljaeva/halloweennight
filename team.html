@@ -29,7 +29,7 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 }
 
 /* Сканер */
-.scan-wrap{position:relative; width:min(80vw,420px); height:min(80vw,420px); margin:10px auto 18px}
+.scan-wrap{position:relative; width:min(80vw,420px); height:min(80vw,420px); margin:10px auto 10px}
 .scan-circle{
   position:absolute; inset:0; border-radius:50%;
   background: radial-gradient(60% 60% at 50% 40%, #22283a 0%, #151a28 55%, #0f1320 100%);
@@ -39,7 +39,7 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 }
 .scan-circle:hover{outline:2px solid rgba(255,183,3,.25); outline-offset:3px}
 
-/* Руки/скан-линии и пульс */
+/* Пульс и бегущая линия */
 .pulse::before{
   content:""; position:absolute; inset:12%; border-radius:50%;
   border:2px solid rgba(255,255,255,.08); animation:pulse 2.2s ease-out infinite;
@@ -53,30 +53,27 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 @keyframes pulse{0%{transform:scale(.9); opacity:.7} 70%{transform:scale(1.05); opacity:.15} 100%{opacity:0}}
 @keyframes scanline{0%{top:-3px} 100%{top:calc(100% + 3px)}}
 
-.hand{
-  width:90px; height:90px; border-radius:50%;
+.hand{ width:90px; height:90px; border-radius:50%;
   background: radial-gradient(circle at 35% 35%, #ffd166, #ff9e00);
   box-shadow:0 0 18px rgba(255,158,0,.45);
   position:relative; transform:translateY(6px);
 }
-.hand:after{
-  content:"👇"; font-size:38px; position:absolute; inset:0; display:grid; place-items:center;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));
-}
+.hand:after{ content:"👇"; font-size:38px; position:absolute; inset:0; display:grid; place-items:center; filter:drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
 
-/* Вращающийся индикатор при сканировании */
-.spinner{
-  position:absolute; width:92%; height:92%; border-radius:50%; inset:4%;
-  border:3px dashed rgba(255,255,255,.18);
-  animation:spin 1.5s linear infinite;
-}
+/* Спиннер */
+.spinner{ position:absolute; width:92%; height:92%; border-radius:50%; inset:4%;
+  border:3px dashed rgba(255,255,255,.18); animation:spin 1.5s linear infinite; display:none }
 @keyframes spin{to{transform:rotate(360deg)}}
 
+/* Прогресс и фразы */
+.progress{width:80%; height:10px; margin:8px auto 0; background:#0f1422; border-radius:8px; overflow:hidden; display:none}
+.progress>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#ffb703,#ffd166); border-radius:8px; transition:width .18s}
+.phase{min-height:24px; color:#adb3c4; margin-top:6px; font-size:14px; display:none}
+
 /* Результат */
-.result{margin:6px 0 14px; font-size:clamp(18px,3.8vw,26px); font-weight:900; display:none}
+.result{margin:10px 0 14px; font-size:clamp(18px,3.8vw,26px); font-weight:900; display:none}
 .result.ghost{color:var(--ok); text-shadow:0 0 12px rgba(102,227,255,.35)}
 .result.hunter{color:var(--hun); text-shadow:0 0 12px rgba(255,209,102,.35)}
-.hint{color:var(--muted); font-size:14px; margin-top:8px}
 
 /* Кнопки */
 .actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:12px}
@@ -87,23 +84,25 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 .btn:disabled{opacity:.6; cursor:not-allowed}
 .btn-primary{background:var(--accent); color:#000; box-shadow:0 6px 16px rgba(255,183,3,.25)}
 .btn:hover{transform:translateY(-2px)}
-
-/* мини примечание */
 .note{color:#8d94a6; font-size:12px; margin-top:6px}
+.small{font-size:12px; color:#8d94a6; margin-top:6px}
 </style>
 </head>
 <body>
   <div class="container">
-    <h1>Распределение по командам</h1>
+    <h1 id="title">Распределение по командам</h1>
     <p class="lead">Дом чувствует вашу энергию… Приложите руку к кругу — он решит, кто вы: <b>Призрак</b> или <b>Охотник</b>.</p>
 
     <div class="panel">
       <div class="scan-wrap">
         <div id="circle" class="scan-circle pulse" aria-label="Коснитесь для начала сканирования">
           <div class="hand" id="hand"></div>
-          <div class="spinner" id="spinner" style="display:none"></div>
+          <div class="spinner" id="spinner"></div>
         </div>
       </div>
+
+      <div class="progress" id="progress"><span id="bar"></span></div>
+      <div class="phase" id="phase">Готовлюсь сканировать…</div>
 
       <div id="result" class="result"></div>
 
@@ -112,78 +111,116 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
         <a id="goBtn" class="btn btn-primary" href="#" style="display:none">В Мистический дом</a>
       </div>
       <div class="note">Команда сохраняется на устройстве и подставится автоматически в доме.</div>
+      <div class="small">Совет: показывайте результат всем, чтобы игрок успел встать к своей команде.</div>
     </div>
   </div>
 
 <script>
-/* Имитация «честного» баланса на ЭТОМ устройстве
-   (между устройствами без сервера это невозможно).
-   Слегка смещаем вероятность в пользу меньшинства
-   в localStorage на данном телефоне. */
-const LS_KEY_TEAM='hn_team';
-const LS_KEY_COUNTS='hn_counts'; // {ghosts: n, hunters: n}
+const LS_KEY_TEAM='hn_team';          // последняя выданная команда (для host.html)
+const LS_KEY_COUNTS='hn_counts_v1';   // счётчик распределения
+
+// UI
+const title  = document.getElementById('title');
 const circle = document.getElementById('circle');
 const spinner= document.getElementById('spinner');
 const hand   = document.getElementById('hand');
 const result = document.getElementById('result');
 const goBtn  = document.getElementById('goBtn');
 const again  = document.getElementById('again');
+const progress = document.getElementById('progress');
+const bar = document.getElementById('bar');
+const phase = document.getElementById('phase');
 
-/* Вспомогательные */
-const getCounts=()=> {
-  try { return JSON.parse(localStorage.getItem(LS_KEY_COUNTS)) || {ghosts:0, hunters:0}; }
-  catch { return {ghosts:0, hunters:0}; }
-};
-const setCounts=(c)=> localStorage.setItem(LS_KEY_COUNTS, JSON.stringify(c));
+// helpers
+const label = team => team==='ghosts' ? 'ПРИЗРАКАМ' : 'ОХОТНИКАМ';
+const classFor = team => team==='ghosts' ? 'ghost' : 'hunter';
+const story = team => team==='ghosts'
+  ? '👻 Ваша энергия принадлежит ПРИЗРАКАМ!'
+  : '🏹 Вас выбрали ОХОТНИКИ!';
 
-function weightedRandomTeam(){
+function getCounts(){
+  try{
+    const raw = localStorage.getItem(LS_KEY_COUNTS);
+    if(!raw) return {ghosts:0,hunters:0};
+    const obj = JSON.parse(raw);
+    return {ghosts: obj.ghosts|0, hunters: obj.hunters|0};
+  }catch{ return {ghosts:0,hunters:0}; }
+}
+function setCounts(c){ localStorage.setItem(LS_KEY_COUNTS, JSON.stringify(c)); }
+
+// Балансирующее распределение:
+// 1) если разница >=2 — отправляем в меньшую команду;
+// 2) иначе — небольшой перекос 65/35 в пользу меньшей.
+function chooseBalancedTeam(){
   const c = getCounts();
-  // базовая вероятность 50/50; если перекос >1, увеличиваем шанс «меньшинства»
-  let pGhost = 0.5;
-  if (c.ghosts > c.hunters) pGhost = 0.33;
-  if (c.hunters > c.ghosts) pGhost = 0.67;
-  return (Math.random() < pGhost) ? 'ghosts' : 'hunters';
+  const diff = c.ghosts - c.hunters; // + значит призраков больше
+  let team;
+  if (diff >= 2) {
+    team = 'hunters';
+  } else if (diff <= -2) {
+    team = 'ghosts';
+  } else if (diff > 0) {
+    team = Math.random() < 0.65 ? 'hunters' : 'ghosts';
+  } else if (diff < 0) {
+    team = Math.random() < 0.65 ? 'ghosts' : 'hunters';
+  } else {
+    team = Math.random() < 0.5 ? 'ghosts' : 'hunters';
+  }
+  // фиксируем
+  if (team==='ghosts') c.ghosts++; else c.hunters++;
+  setCounts(c);
+  return team;
 }
 
-function label(team){
-  return team==='ghosts' ? 'ПРИЗРАКАМ' : 'ОХОТНИКАМ';
-}
-function classFor(team){
-  return team==='ghosts' ? 'ghost' : 'hunter';
-}
+function lockUI(lock){ circle.style.pointerEvents = lock ? 'none' : 'auto'; }
 
-function lockUI(lock){
-  circle.style.pointerEvents = lock ? 'none':'auto';
+function animatePhases(totalMs){
+  const steps = [
+    'Сканирую ауру…', 
+    'Расшифровываю символы…',
+    'Сравниваю энергетический отпечаток…',
+    `Совпадение с энергополем — ${60+Math.floor(Math.random()*35)}%`
+  ];
+  let i=0, elapsed=0;
+  phase.style.display='block';
+  progress.style.display='block';
+  bar.style.width='0%';
+  const tick = 80;
+  const timer = setInterval(()=>{
+    elapsed += tick;
+    const pct = Math.min(100, Math.floor((elapsed/totalMs)*100));
+    bar.style.width = pct+'%';
+    if (pct> (i+1)*25 && i<steps.length-1) i++;
+    phase.textContent = steps[i];
+    if (elapsed>=totalMs){ clearInterval(timer); }
+  }, tick);
 }
 
 function startScan(){
+  // reset
   result.style.display='none';
   goBtn.style.display='none';
   again.style.display='none';
   hand.style.display='none';
+
   spinner.style.display='block';
+  animatePhases(2200 + Math.random()*900);
   lockUI(true);
 
-  // имитация «сканирования»: 2–3 секунды со случайным фликом
-  const dur = 1800 + Math.random()*1200;
+  const dur = 2300 + Math.random()*900;
   setTimeout(()=>{
-    const team = weightedRandomTeam();
+    const team = chooseBalancedTeam(); // <— сбалансированный выбор
 
-    // сохранить выбор
     localStorage.setItem(LS_KEY_TEAM, team);
-    const counts = getCounts();
-    (team==='ghosts') ? counts.ghosts++ : counts.hunters++;
-    setCounts(counts);
 
-    // показать результат
     spinner.style.display='none';
+    phase.style.display='none';
+    progress.style.display='none';
+
     result.className='result '+classFor(team);
-    result.innerHTML = (team==='ghosts'
-      ? '👻 Ваша энергия принадлежит ПРИЗРАКАМ!'
-      : '🏹 Вас выбрали ОХОТНИКИ!');
+    result.textContent = story(team);
     result.style.display='block';
 
-    // кнопки
     again.style.display='inline-block';
     goBtn.href = `host.html?team=${team}`;
     goBtn.style.display='inline-block';
@@ -195,15 +232,19 @@ function startScan(){
 circle.addEventListener('click', startScan);
 again.addEventListener('click', startScan);
 
-// если команда уже была выбрана ранее — покажем сразу и дадим кнопку
+// скрытый сброс (удержание заголовка ~2 сек)
+let holdTimer=null;
+title.addEventListener('pointerdown',()=>{ holdTimer=setTimeout(()=>{ localStorage.removeItem(LS_KEY_COUNTS); alert('Счётчики распределения сброшены'); },2000); });
+title.addEventListener('pointerup',()=> clearTimeout(holdTimer));
+title.addEventListener('pointerleave',()=> clearTimeout(holdTimer));
+
+// Если команда уже выбрана — показываем и даём кнопку
 (function init(){
   const team = localStorage.getItem(LS_KEY_TEAM);
   if(team){
     hand.style.display='none';
     result.className='result '+classFor(team);
-    result.textContent = (team==='ghosts'
-      ? '👻 Ваша энергия принадлежит ПРИЗРАКАМ!'
-      : '🏹 Вас выбрали ОХОТНИКИ!');
+    result.textContent = story(team);
     result.style.display='block';
     goBtn.href=`host.html?team=${team}`;
     goBtn.style.display='inline-block';
