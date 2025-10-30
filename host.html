@@ -112,26 +112,47 @@ const TEAMS = [
 ];
 
 const ROOMS = [
-  {
-    key:'library',
-    title:'Библиотека',
-    img:'library.png',
-    story:'Полки до потолка, карточный каталог и скрип перьевой ручки. На столе записка: «Ключ — в первых буквах найденного».',
-    render(container, helpers){
-      const items = ['Кружка','Носок','Игрушка','Галстук','Альбом'];
-      container.innerHTML = `
-        <p><b>Найдите и соберите перед собой эти 5 предметов:</b></p>
-        <ul>${items.map(it=>`<li>${it}</li>`).join('')}</ul>
-        <p class="muted">Первые буквы предметов образуют пароль.</p>
+{
+  key:'library',
+  title:'Библиотека',
+  img:'library.png',
+  story:'Полки до потолка, карточный каталог и скрип перьевой ручки. В воздухе витает запах старых страниц и тайны. На столе записка: «Ключ — в первых буквах найденного».',
+  render(container, helpers){
+    const items = ['Кружка','Носок','Игрушка','Галстук','Альбом'];
+    // случайная перестановка предметов
+    const shuffled = items.sort(() => Math.random() - 0.5);
+
+    container.innerHTML = `
+      <p><b>Найдите и соберите перед собой эти 5 предметов (в любом порядке):</b></p>
+      <ul id="itemList">${shuffled.map(it=>`<li>${it}</li>`).join('')}</ul>
+      <button id="confirmItems" class="btn primary" style="margin-top:10px">Предметы собраны</button>
+      <div id="stage2" style="display:none; margin-top:15px">
+        <p class="muted">Первые буквы предметов образуют пароль. Введите его ниже:</p>
         <div class="inputRow">
           <input id="libAnswer" type="text" placeholder="введите пароль">
           <button id="libCheck" class="btn secondary">Проверить</button>
-        </div>`;
-      const inp = container.querySelector('#libAnswer');
-      const btn = container.querySelector('#libCheck');
-      btn.onclick = ()=> helpers.check((inp.value||'').trim().toUpperCase()==='КНИГА');
-      inp.addEventListener('keydown', e=>{ if(e.key==='Enter') btn.click(); });
-    }
+        </div>
+      </div>
+    `;
+
+    const confirmBtn = container.querySelector('#confirmItems');
+    const stage2 = container.querySelector('#stage2');
+    const inp = container.querySelector('#libAnswer');
+    const checkBtn = container.querySelector('#libCheck');
+
+    confirmBtn.onclick = () => {
+      confirmBtn.disabled = true;
+      confirmBtn.textContent = 'Отлично! Теперь разгадайте, что означают эти предметы...';
+      stage2.style.display = 'block';
+    };
+
+    checkBtn.onclick = () => {
+      const val = (inp.value || '').trim().toUpperCase();
+      if (val === 'КНИГА') helpers.check(true);
+      else helpers.check(false);
+    };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkBtn.click(); });
+  }
   },
   {
     key:'alchemy',
