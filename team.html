@@ -65,7 +65,7 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
   border:3px dashed rgba(255,255,255,.18); animation:spin 1.5s linear infinite; display:none }
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Прогресс и фразы */
+/* Прогресс и фазы */
 .progress{width:80%; height:10px; margin:8px auto 0; background:#0f1422; border-radius:8px; overflow:hidden; display:none}
 .progress>span{display:block; height:100%; width:0%; background:linear-gradient(90deg,#ffb703,#ffd166); border-radius:8px; transition:width .18s}
 .phase{min-height:24px; color:#adb3c4; margin-top:6px; font-size:14px; display:none}
@@ -85,7 +85,6 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
 .btn-primary{background:var(--accent); color:#000; box-shadow:0 6px 16px rgba(255,183,3,.25)}
 .btn:hover{transform:translateY(-2px)}
 .note{color:#8d94a6; font-size:12px; margin-top:6px}
-.small{font-size:12px; color:#8d94a6; margin-top:6px}
 </style>
 </head>
 <body>
@@ -111,16 +110,12 @@ h1{margin:0 0 8px; font-weight:900; font-size:clamp(24px,5vw,40px)}
         <a id="goBtn" class="btn btn-primary" href="#" style="display:none">В Мистический дом</a>
       </div>
       <div class="note">Команда сохраняется на устройстве и подставится автоматически в доме.</div>
-      <div class="small">Совет: показывайте результат всем, чтобы игрок успел встать к своей команде.</div>
     </div>
   </div>
 
 <script>
-const LS_KEY_TEAM='hn_team';          // последняя выданная команда (для host.html)
-const LS_KEY_COUNTS='hn_counts_v1';   // счётчик распределения
-
-// UI
-const title  = document.getElementById('title');
+const LS_KEY_TEAM='hn_team';
+const LS_KEY_COUNTS='hn_counts_v1';
 const circle = document.getElementById('circle');
 const spinner= document.getElementById('spinner');
 const hand   = document.getElementById('hand');
@@ -130,8 +125,8 @@ const again  = document.getElementById('again');
 const progress = document.getElementById('progress');
 const bar = document.getElementById('bar');
 const phase = document.getElementById('phase');
+const title  = document.getElementById('title');
 
-// helpers
 const label = team => team==='ghosts' ? 'ПРИЗРАКАМ' : 'ОХОТНИКАМ';
 const classFor = team => team==='ghosts' ? 'ghost' : 'hunter';
 const story = team => team==='ghosts'
@@ -148,25 +143,15 @@ function getCounts(){
 }
 function setCounts(c){ localStorage.setItem(LS_KEY_COUNTS, JSON.stringify(c)); }
 
-// Балансирующее распределение:
-// 1) если разница >=2 — отправляем в меньшую команду;
-// 2) иначе — небольшой перекос 65/35 в пользу меньшей.
 function chooseBalancedTeam(){
   const c = getCounts();
-  const diff = c.ghosts - c.hunters; // + значит призраков больше
+  const diff = c.ghosts - c.hunters;
   let team;
-  if (diff >= 2) {
-    team = 'hunters';
-  } else if (diff <= -2) {
-    team = 'ghosts';
-  } else if (diff > 0) {
-    team = Math.random() < 0.65 ? 'hunters' : 'ghosts';
-  } else if (diff < 0) {
-    team = Math.random() < 0.65 ? 'ghosts' : 'hunters';
-  } else {
-    team = Math.random() < 0.5 ? 'ghosts' : 'hunters';
-  }
-  // фиксируем
+  if (diff >= 2) team = 'hunters';
+  else if (diff <= -2) team = 'ghosts';
+  else if (diff > 0) team = Math.random() < 0.65 ? 'hunters' : 'ghosts';
+  else if (diff < 0) team = Math.random() < 0.65 ? 'ghosts' : 'hunters';
+  else team = Math.random() < 0.5 ? 'ghosts' : 'hunters';
   if (team==='ghosts') c.ghosts++; else c.hunters++;
   setCounts(c);
   return team;
@@ -185,46 +170,39 @@ function animatePhases(totalMs){
   phase.style.display='block';
   progress.style.display='block';
   bar.style.width='0%';
-  const tick = 80;
+  const tick = 120; // было 80 — теперь фазы дольше
   const timer = setInterval(()=>{
     elapsed += tick;
     const pct = Math.min(100, Math.floor((elapsed/totalMs)*100));
     bar.style.width = pct+'%';
-    if (pct> (i+1)*25 && i<steps.length-1) i++;
+    if (pct > (i+1)*25 && i < steps.length-1) i++;
     phase.textContent = steps[i];
-    if (elapsed>=totalMs){ clearInterval(timer); }
+    if (elapsed >= totalMs) clearInterval(timer);
   }, tick);
 }
 
 function startScan(){
-  // reset
   result.style.display='none';
   goBtn.style.display='none';
   again.style.display='none';
   hand.style.display='none';
-
   spinner.style.display='block';
-  animatePhases(2200 + Math.random()*900);
+  animatePhases(2600 + Math.random()*900); // чуть длиннее общий процесс
   lockUI(true);
 
-  const dur = 2300 + Math.random()*900;
+  const dur = 2700 + Math.random()*900;
   setTimeout(()=>{
-    const team = chooseBalancedTeam(); // <— сбалансированный выбор
-
+    const team = chooseBalancedTeam();
     localStorage.setItem(LS_KEY_TEAM, team);
-
     spinner.style.display='none';
     phase.style.display='none';
     progress.style.display='none';
-
     result.className='result '+classFor(team);
     result.textContent = story(team);
     result.style.display='block';
-
     again.style.display='inline-block';
     goBtn.href = `host.html?team=${team}`;
     goBtn.style.display='inline-block';
-
     lockUI(false);
   }, dur);
 }
@@ -232,13 +210,12 @@ function startScan(){
 circle.addEventListener('click', startScan);
 again.addEventListener('click', startScan);
 
-// скрытый сброс (удержание заголовка ~2 сек)
+// скрытый сброс (удержание заголовка 2 сек)
 let holdTimer=null;
 title.addEventListener('pointerdown',()=>{ holdTimer=setTimeout(()=>{ localStorage.removeItem(LS_KEY_COUNTS); alert('Счётчики распределения сброшены'); },2000); });
 title.addEventListener('pointerup',()=> clearTimeout(holdTimer));
 title.addEventListener('pointerleave',()=> clearTimeout(holdTimer));
 
-// Если команда уже выбрана — показываем и даём кнопку
 (function init(){
   const team = localStorage.getItem(LS_KEY_TEAM);
   if(team){
