@@ -1,24 +1,267 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Кодовый замок</title>
-<style>body{display:grid;place-items:center;min-height:100dvh;background:#0f0f14;color:#fff;font-family:system-ui}
-.box{background:#181824;padding:24px;border-radius:16px;border:1px solid #2a2a3a;text-align:center}
-input{font-size:28px;letter-spacing:.3em;text-align:center;padding:8px 12px;border-radius:10px;border:1px solid #444;background:#111;color:#fff}
-button{margin-top:10px;padding:10px 14px;border:0;border-radius:10px;background:#FFBA08;color:#000;font-weight:700}
-.msg{margin-top:10px;min-height:1.6em}
+<style>
+  :root{
+    --bg:#0f0f14; --panel:#181824; --stroke:#2a2a3a;
+    --accent:#FFBA08; --text:#ffffff; --muted:#b9bfd6;
+    --ok:#23d18b; --bad:#ff5c5c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100dvh; display:grid; place-items:center;
+    background: radial-gradient(1000px 600px at 50% 0%, #14151d 0%, var(--bg) 60%);
+    color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+  }
+  .wrap{width:min(520px,92vw)}
+  header{
+    display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
+  }
+  .lang{
+    display:flex; gap:8px;
+  }
+  .lang button{
+    background:#232433; color:#fff; border:1px solid #35364a; border-radius:10px;
+    padding:8px 12px; font-weight:700; cursor:pointer;
+  }
+  .lang button.active{ outline:2px solid var(--accent); color:#000; background:var(--accent); border-color:transparent; }
+
+  .box{
+    background:linear-gradient(180deg, #1a1b27 0%, var(--panel) 100%);
+    border:1px solid var(--stroke); border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  h1{margin:0 0 6px; font-size:clamp(22px,4.8vw,28px); font-weight:900;}
+  p.lead{margin:0 0 14px; color:var(--muted)}
+
+  /* PIN boxes */
+  .pin{
+    display:flex; justify-content:center; gap:10px; margin:14px 0 8px;
+  }
+  .dot{
+    width:52px; height:52px; border-radius:12px; border:1px solid #3a3b52; background:#101119;
+    display:grid; place-items:center; font-size:22px; letter-spacing:.05em;
+    transition:border-color .2s, transform .2s, background .2s;
+  }
+  .dot.filled::after{content:"•"; font-size:30px; transform:translateY(-2px)}
+  .pin.shake{animation:shake .28s linear 1}
+  @keyframes shake{
+    0%{transform:translateX(0)} 25%{transform:translateX(-6px)} 50%{transform:translateX(6px)} 75%{transform:translateX(-3px)} 100%{transform:translateX(0)}
+  }
+
+  /* Keypad */
+  .pad{
+    margin-top:10px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+  }
+  .key{
+    padding:16px 0; border:1px solid #323349; border-radius:14px; background:#121320; color:#fff;
+    font-size:22px; font-weight:800; cursor:pointer; user-select:none; transition:.15s;
+  }
+  .key:active{transform:scale(.98)}
+  .key.accent{background:var(--accent); color:#000; border-color:transparent; font-weight:900}
+  .key.warn{background:#2a1120; border-color:#4d1f30}
+  .row{grid-column:1 / -1; display:flex; gap:10px}
+  .row .key{flex:1}
+
+  /* Helper / message */
+  .msg{min-height:1.6em; text-align:center; margin-top:12px; color:var(--muted)}
+  .msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+
+  /* Success screen */
+  .success{
+    display:none; text-align:center; padding:18px; border:1px solid #234433;
+    background:linear-gradient(180deg,#0f1e17,#0c1713); border-radius:16px; margin-top:14px;
+  }
+  .success.show{display:block}
+  .btn{
+    margin-top:14px; padding:12px 16px; border:0; border-radius:12px;
+    background:var(--accent); color:#000; font-weight:900; cursor:pointer;
+  }
+
+  /* Small link row */
+  .links{display:flex; justify-content:space-between; gap:12px; margin-top:10px; font-size:14px; color:var(--muted)}
+  .links a{color:var(--accent); text-decoration:none}
 </style>
-<div class="box">
-  <h1>🔒 Введите код</h1>
-  <input id="code" maxlength="4" inputmode="numeric" placeholder="____">
-  <button onclick="check()">Открыть</button>
-  <div class="msg" id="msg"></div>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div style="font-weight:900">🔒 <span data-i="title">Кодовый замок</span></div>
+    <div class="lang">
+      <button id="btn-ru">Рус</button>
+      <button id="btn-es">Esp</button>
+    </div>
+  </header>
+
+  <div class="box">
+    <h1 data-i="headline">Введи код — и получи приз</h1>
+    <p class="lead" data-i="lead">Собери цифры в заданиях и открой замок. Пользуйся клавиатурой ниже.</p>
+
+    <div class="pin" id="pin">
+      <div class="dot" id="d0"></div>
+      <div class="dot" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+    </div>
+
+    <div class="pad" id="pad">
+      <button class="key">1</button>
+      <button class="key">2</button>
+      <button class="key">3</button>
+      <button class="key">4</button>
+      <button class="key">5</button>
+      <button class="key">6</button>
+      <button class="key">7</button>
+      <button class="key">8</button>
+      <button class="key">9</button>
+      <div class="row">
+        <button class="key warn" id="clear" data-i="clear">Стереть</button>
+        <button class="key">0</button>
+        <button class="key accent" id="open" data-i="open">Открыть</button>
+      </div>
+    </div>
+
+    <div class="msg" id="msg">&nbsp;</div>
+
+    <div id="success" class="success">
+      <div style="font-size:18px; font-weight:900" data-i="open-ok-title">Открыто!</div>
+      <p data-i="open-ok-text">Под столом — сундук с конфетами. Подойди к Ире и забери приз.</p>
+      <a class="btn" href="index.html" data-i="back">Вернуться в меню</a>
+    </div>
+
+    <div class="links">
+      <a href="#" id="hintLink" data-i="hint-link">Показать подсказку</a>
+      <a href="#" id="resetLink" data-i="reset-link">Начать сначала</a>
+    </div>
+  </div>
 </div>
+
 <script>
-const SECRET="7421"; // поменяй под свой квест
-function check(){
-  const v=document.getElementById('code').value.trim();
-  const msg=document.getElementById('msg');
-  if(v===SECRET){msg.innerHTML="✅ Открыто! Под столом — сундук с конфетами."; confetti()}
-  else msg.textContent="❌ Неверно. Ищи подсказки в комнате!";
+/* ====== Настройки ====== */
+const SECRET = new URLSearchParams(location.search).get('code') || '7421'; // можно передать ?code=1234
+const MAXLEN = 4;
+
+/* ====== I18N ====== */
+const T = {
+  ru:{
+    title:'Кодовый замок',
+    headline:'Введи код — и получи приз',
+    lead:'Собери цифры в заданиях и открой замок. Пользуйся клавиатурой ниже.',
+    clear:'Стереть', open:'Открыть',
+    wrong:'Неверно. У вас собраны все цифры?',
+    openOkTitle:'Открыто!',
+    openOkText:'Под столом — сундук с конфетами. Подойди к Ире и забери приз.',
+    back:'Вернуться в меню',
+    hint:'Подсказка: цифры встречались на листах заданий, предметах и в комнатах.',
+    hintLink:'Показать подсказку',
+    resetLink:'Начать сначала'
+  },
+  es:{
+    title:'Cerradura con código',
+    headline:'Introduce el código para conseguir el premio',
+    lead:'Reúne los dígitos en las pruebas y abre la cerradura. Usa el teclado de abajo.',
+    clear:'Borrar', open:'Abrir',
+    wrong:'Incorrecto. ¿Ya reuniste todos los dígitos?',
+    openOkTitle:'¡Abierto!',
+    openOkText:'Bajo la mesa hay un cofre con dulces. Ven a por el premio.',
+    back:'Volver al menú',
+    hint:'Pista: los números aparecían en las hojas de tareas, en objetos y en las salas.',
+    hintLink:'Mostrar pista',
+    resetLink:'Empezar de nuevo'
+  }
+};
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+const i18nApply = lang=>{
+  document.documentElement.lang = lang==='es'?'es':'ru';
+  const dict = T[lang];
+  $$('[data-i]').forEach(el=>{
+    const k = el.getAttribute('data-i');
+    if(dict[k]) el.textContent = dict[k];
+  });
+  $('#btn-ru').classList.toggle('active', lang==='ru');
+  $('#btn-es').classList.toggle('active', lang==='es');
+  localStorage.setItem('padlock_lang', lang);
+};
+const initLang = ()=>{
+  const qs = new URLSearchParams(location.search).get('lang');
+  const stored = localStorage.getItem('padlock_lang');
+  const lang = (qs||stored||'ru').toLowerCase().startsWith('es') ? 'es' : 'ru';
+  i18nApply(lang);
+};
+$('#btn-ru').onclick=()=>i18nApply('ru');
+$('#btn-es').onclick=()=>i18nApply('es');
+
+/* ====== Логика PIN ====== */
+let buffer = [];
+const setDots = ()=>{
+  for(let i=0;i<MAXLEN;i++){
+    $('#d'+i).classList.toggle('filled', i<buffer.length);
+  }
+};
+const vibrate = ms => ('vibrate' in navigator) && navigator.vibrate(ms);
+
+const errorFx = ()=>{
+  $('#pin').classList.remove('shake'); void $('#pin').offsetWidth; // restart animation
+  $('#pin').classList.add('shake');
+  $('#msg').className='msg bad';
+  $('#msg').textContent = T[currentLang()].wrong;
+  vibrate([60,40,60]);
+};
+
+const successFx = ()=>{
+  $('#msg').className='msg ok';
+  $('#msg').textContent = '';
+  $('#success').classList.add('show');
+  // небольшая «пульсация» фона
+  let i=0, id=setInterval(()=>{document.body.style.background = (i++%2)?'radial-gradient(1000px 600px at 50% 0%, #17231a 0%, #0d1310 60%)':'radial-gradient(1000px 600px at 50% 0%, #14151d 0%, #0f0f14 60%)'; if(i>8) clearInterval(id);},120);
+  vibrate(120);
+};
+
+const currentLang = ()=> document.documentElement.lang === 'es' ? 'es' : 'ru';
+
+const pushDigit = d=>{
+  if(buffer.length>=MAXLEN) return;
+  buffer.push(d); setDots();
+};
+const popDigit = ()=>{
+  buffer.pop(); setDots();
+};
+const clearAll = ()=>{
+  buffer = []; setDots(); $('#msg').className='msg'; $('#msg').textContent=''; $('#success').classList.remove('show');
+};
+
+$('#pad').addEventListener('click', e=>{
+  if(!e.target.classList.contains('key')) return;
+  const t = e.target;
+  if(t.id==='clear'){ popDigit(); return; }
+  if(t.id==='open'){
+    if(buffer.join('')===SECRET) successFx(); else { errorFx(); clearAll(); }
+    return;
+  }
+  pushDigit(t.textContent.trim());
+});
+
+/* Подсказка и сброс */
+$('#hintLink').onclick = (e)=>{ e.preventDefault(); alert(T[currentLang()].hint); };
+$('#resetLink').onclick = (e)=>{ e.preventDefault(); clearAll(); };
+
+/* Клавиатура устройства */
+window.addEventListener('keydown', e=>{
+  if(e.key>='0' && e.key<='9') pushDigit(e.key);
+  if(e.key==='Backspace') popDigit();
+  if(e.key==='Enter') $('#open').click();
+});
+
+/* Запуск */
+function boot(){
+  initLang();
+  setDots();
 }
-function confetti(){let i=0;const c=setInterval(()=>{document.body.style.background=i%2?'#1b1b29':'#0f0f14';i++;if(i>8)clearInterval(c)},120)}
+boot();
 </script>
+</body>
+</html>
