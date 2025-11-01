@@ -17,12 +17,8 @@
     color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
   }
   .wrap{width:min(520px,92vw)}
-  header{
-    display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;
-  }
-  .lang{
-    display:flex; gap:8px;
-  }
+  header{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .lang{display:flex; gap:8px;}
   .lang button{
     background:#232433; color:#fff; border:1px solid #35364a; border-radius:10px;
     padding:8px 12px; font-weight:700; cursor:pointer;
@@ -37,9 +33,7 @@
   p.lead{margin:0 0 14px; color:var(--muted)}
 
   /* PIN boxes */
-  .pin{
-    display:flex; justify-content:center; gap:10px; margin:14px 0 8px;
-  }
+  .pin{display:flex; justify-content:center; gap:10px; margin:14px 0 8px;}
   .dot{
     width:52px; height:52px; border-radius:12px; border:1px solid #3a3b52; background:#101119;
     display:grid; place-items:center; font-size:22px; letter-spacing:.05em;
@@ -52,10 +46,7 @@
   }
 
   /* Keypad */
-  .pad{
-    margin-top:10px;
-    display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
-  }
+  .pad{margin-top:10px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
   .key{
     padding:16px 0; border:1px solid #323349; border-radius:14px; background:#121320; color:#fff;
     font-size:22px; font-weight:800; cursor:pointer; user-select:none; transition:.15s;
@@ -81,8 +72,8 @@
     background:var(--accent); color:#000; font-weight:900; cursor:pointer;
   }
 
-  /* Small link row */
-  .links{display:flex; justify-content:space-between; gap:12px; margin-top:10px; font-size:14px; color:var(--muted)}
+  /* Links row */
+  .links{display:flex; justify-content:space-between; gap:12px; margin-top:10px; font-size:14px; color:var(--muted); flex-wrap:wrap}
   .links a{color:var(--accent); text-decoration:none}
 </style>
 </head>
@@ -133,6 +124,7 @@
     </div>
 
     <div class="links">
+      <a href="index.html" id="backTop" data-i="back">Вернуться в меню</a>
       <a href="#" id="hintLink" data-i="hint-link">Показать подсказку</a>
       <a href="#" id="resetLink" data-i="reset-link">Начать сначала</a>
     </div>
@@ -149,11 +141,11 @@ const T = {
   ru:{
     title:'Кодовый замок',
     headline:'Введи код — и получи приз',
-    lead:'Собери цифры в заданиях и открой замок. Пользуйся клавиатурой ниже.',
+    lead:'Собери цифры и открой замок. Замок открылся? Получи свой приз у Иры.',
     clear:'Стереть', open:'Открыть',
     wrong:'Неверно. У вас собраны все цифры?',
     openOkTitle:'Открыто!',
-    openOkText:'Под столом — сундук с конфетами. Подойди к Ире и забери приз.',
+    openOkText:'Поздравляю! Замок открылся. Подойди к Ире и забери приз.',
     back:'Вернуться в меню',
     hint:'Подсказка: цифры можно найти на предметах и в комнатах.',
     hintLink:'Показать подсказку',
@@ -162,13 +154,13 @@ const T = {
   es:{
     title:'Cerradura con código',
     headline:'Introduce el código para conseguir el premio',
-    lead:'Reúne los dígitos en las pruebas y abre la cerradura. Usa el teclado de abajo.',
+    lead:'Reúne los dígitos y abre la cerradura. ¿Se abrió? Recoge tu premio con Irina.',
     clear:'Borrar', open:'Abrir',
     wrong:'Incorrecto. ¿Ya reuniste todos los dígitos?',
     openOkTitle:'¡Abierto!',
-    openOkText:'Bajo la mesa hay un cofre con dulces. Ven a por el premio.',
+    openOkText:'¡Enhorabuena! La cerradura se abrió. Ven con Irina para recoger el premio.',
     back:'Volver al menú',
-    hint:'Pista: los números aparecían en las hojas de tareas, en objetos y en las salas.',
+    hint:'Pista: los números se esconden en objetos y en las salas.',
     hintLink:'Mostrar pista',
     resetLink:'Empezar de nuevo'
   }
@@ -216,7 +208,7 @@ const successFx = ()=>{
   $('#msg').className='msg ok';
   $('#msg').textContent = '';
   $('#success').classList.add('show');
-  // небольшая «пульсация» фона
+  // пульсация фона
   let i=0, id=setInterval(()=>{document.body.style.background = (i++%2)?'radial-gradient(1000px 600px at 50% 0%, #17231a 0%, #0d1310 60%)':'radial-gradient(1000px 600px at 50% 0%, #14151d 0%, #0f0f14 60%)'; if(i>8) clearInterval(id);},120);
   vibrate(120);
 };
@@ -228,7 +220,7 @@ const pushDigit = d=>{
   buffer.push(d); setDots();
 };
 const popDigit = ()=>{
-  buffer.pop(); setDots();
+  if(buffer.length){ buffer.pop(); setDots(); }
 };
 const clearAll = ()=>{
   buffer = []; setDots(); $('#msg').className='msg'; $('#msg').textContent=''; $('#success').classList.remove('show');
