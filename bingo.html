@@ -1,45 +1,142 @@
-<!doctype html><html lang="ru"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Halloween Bingo</title>
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>🎃 Halloween Bingo</title>
 <style>
-body{font-family:system-ui,Arial;background:#111;color:#fff;display:grid;place-items:center;min-height:100dvh;margin:0}
-.wrap{max-width:820px;padding:16px}
-h1{margin:8px 0 16px;text-align:center}
-.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-.cell{aspect-ratio:1/1;border:1px solid #444;border-radius:10px;display:grid;place-items:center;text-align:center;padding:8px;background:#1a1a24;cursor:pointer}
-.cell.on{background:#CF2C02;color:#000;font-weight:800;box-shadow:0 0 0 3px #FFBA08 inset}
-small{opacity:.7}
-.btns{display:flex;gap:8px;justify-content:center;margin:12px 0}
-button{padding:10px 14px;border:0;border-radius:10px;background:#FFBA08;color:#000;font-weight:700}
+  :root{--bg:#111;--card:#1a1a24;--stroke:#444;--accent:#FFBA08;--hit:#CF2C02}
+  *{box-sizing:border-box}
+  body{font-family:system-ui,Arial;background:var(--bg);color:#fff;display:grid;place-items:center;min-height:100dvh;margin:0}
+  .wrap{max-width:900px;width:92vw;padding:16px}
+  header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px}
+  h1{margin:8px 0 16px;text-align:left}
+  .lang{display:flex;gap:8px}
+  .lang button{padding:8px 12px;border-radius:10px;border:1px solid #2d2d39;background:#222;color:#fff;font-weight:800;cursor:pointer}
+  .lang button.active{background:var(--accent);color:#000;border-color:transparent}
+  .grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .cell{aspect-ratio:1/1;border:1px solid var(--stroke);border-radius:10px;display:grid;place-items:center;text-align:center;padding:8px;background:var(--card);cursor:pointer}
+  .cell.on{background:var(--hit);color:#000;font-weight:800;box-shadow:0 0 0 3px var(--accent) inset}
+  small{opacity:.75}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+  button.action{padding:10px 14px;border:0;border-radius:10px;background:var(--accent);color:#000;font-weight:800;cursor:pointer}
+  button.secondary{background:#2a2a33;color:#fff}
+  .note{margin-top:10px}
 </style>
+
 <div class="wrap">
-  <h1>👻 Halloween Bingo</h1>
-  <div class="btns"><button id="new">Новая карточка</button><button id="clear">Снять отметки</button></div>
+  <header>
+    <h1 id="h-title">👻 Halloween Bingo</h1>
+    <div class="lang">
+      <button id="btn-ru" class="active">Рус</button>
+      <button id="btn-es">Esp</button>
+    </div>
+  </header>
+
+  <div class="btns">
+    <button id="new" class="action"></button>
+    <button id="clear" class="action secondary"></button>
+  </div>
+
   <div class="grid" id="grid"></div>
-  <p><small>Правило: отмечай клетку, когда событие произошло в реальной жизни. Линия (5 подряд) — крикни «БУ!» и показывай экран ведущему.</small></p>
+
+  <p class="note"><small id="rule"></small></p>
 </div>
+
 <script>
-const items = [
-"Кто-то сказал «Бу!»","Страшный звук","Мигание света","Фотка с тыквой",
-"Паутина/паук в декоре","Танец ведьмы","Совместное селфи","История ужасов",
-"Розыгрыш кого-то","Упал реквизит","Скрим-звук со сцены","Кто-то в маске",
-"Чёрная кошка на картинке","Метель конфетти","Шёпот заговоров",
-"Кто-то пролил напиток","Нарисованный шрам","Фраза «только не страшно»",
-"Призрак в сторис","Смешной костюм","Детский смех","Костяной браслет",
-"Тыквенный смайл в чате","Флешмоб танца","Кто-то зевнул от усталости"
-];
-const key="bingoState";
-const grid=document.getElementById('grid');
+/* ---------- i18n словари ---------- */
+const I18N = {
+  ru: {
+    title: "👻 Halloween Bingo",
+    newCard: "Новая карточка",
+    clear: "Снять отметки",
+    rule: "Правило: отмечай клетку, когда событие произошло в реальной жизни. Линия (5 подряд) — крикни «БУ!» и покажи экран ведущему.",
+    win: "🎉 БИНГО! Позови ведущего за приз!",
+    items: [
+      "Кто-то сказал «Бу!»","Страшный звук","Мигание света","Фотка с тыквой",
+      "Паутина/паук в декоре","Танец ведьмы","Совместное селфи","История ужасов",
+      "Розыгрыш кого-то","Упал реквизит","Громкий скрим","Кто-то в маске",
+      "Чёрная кошка на картинке","Конфетти-метель","Шёпот заклинания",
+      "Кто-то пролил напиток","Нарисованный шрам","Фраза «только не страшно»",
+      "Призрак в сторис","Смешной костюм","Детский смех","Браслет «из костей»",
+      "Тыквенный смайл в чате","Флешмоб танца","Кто-то зевнул"
+    ]
+  },
+  es: {
+    title: "👻 Bingo de Halloween",
+    newCard: "Nueva tarjeta",
+    clear: "Borrar marcas",
+    rule: "Regla: marca una casilla cuando ocurra el evento en la vida real. ¡Cinco en línea! — grita «¡BU!» y enseña la pantalla al anfitrión.",
+    win: "🎉 ¡BINGO! ¡Llama al anfitrión para recoger tu premio!",
+    items: [
+      "Alguien dijo «¡Buh!»","Sonido aterrador","Luz parpadeante","Foto con calabaza",
+      "Telaraña o araña en la deco","Baile de bruja","Selfie en grupo","Historia de miedo",
+      "Broma o susto a alguien","Cae un decorado","Grito fuerte","Alguien con máscara",
+      "Gato negro en una imagen","Tormenta de confeti","Susurro de hechizo",
+      "Alguien derramó bebida","Cicatriz pintada","Frase «que no dé miedo»",
+      "Fantasma en las stories","Disfraz gracioso","Risa de niño","Pulsera de huesos",
+      "Emoji de calabaza en chat","Baile grupal/flashmob","Alguien bosteza"
+    ]
+  }
+};
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const grid = $('#grid');
+const LS_LANG = 'bingo_lang';
+const keyState = lang => `bingoState_${lang}`;
+const keyItems = lang => `bingoItems_${lang}`;
+
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+/* ---------- состояние ---------- */
+let lang = (localStorage.getItem(LS_LANG) || (navigator.language||'ru').startsWith('es')?'es':'ru');
+if(!['ru','es'].includes(lang)) lang='ru';
+applyLang(lang);
+
+/* ---------- UI / язык ---------- */
+function applyLang(l){
+  lang = l;
+  localStorage.setItem(LS_LANG, lang);
+  document.documentElement.lang = lang;
+  const t = I18N[lang];
+
+  $('#h-title').textContent = t.title;
+  $('#new').textContent = t.newCard;
+  $('#clear').textContent = t.clear;
+  $('#rule').textContent = t.rule;
+
+  $('#btn-ru').classList.toggle('active', lang==='ru');
+  $('#btn-es').classList.toggle('active', lang==='es');
+
+  // подхватить сохранённое или собрать новую карточку
+  const savedItems = JSON.parse(localStorage.getItem(keyItems(lang))||'null');
+  const savedState = JSON.parse(localStorage.getItem(keyState(lang))||'{}');
+  if(savedItems) render(savedItems, savedState);
+  else build();
+}
+
+$('#btn-ru').onclick = ()=>applyLang('ru');
+$('#btn-es').onclick = ()=>applyLang('es');
+
+/* ---------- сборка/рендер ---------- */
 function build(){
-  const arr=shuffle(items.slice()).slice(0,25);
-  localStorage.setItem('bingoItems',JSON.stringify(arr));
+  const pool = I18N[lang].items.slice();
+  const arr = shuffle(pool).slice(0,25);
+  localStorage.setItem(keyItems(lang), JSON.stringify(arr));
   render(arr, {});
 }
 function render(arr, on={}){
-  grid.innerHTML='';
-  arr.forEach((t,i)=>{
-    const d=document.createElement('div'); d.className='cell'+(on[i]?' on':''), d.textContent=t;
-    d.onclick=()=>{on[i]=!on[i]; localStorage.setItem(key,JSON.stringify(on)); render(arr,on); checkWin(on)};
+  grid.innerHTML = '';
+  arr.forEach((text,i)=>{
+    const d = document.createElement('div');
+    d.className = 'cell' + (on[i] ? ' on' : '');
+    d.textContent = text;
+    d.onclick = ()=>{
+      on[i] = !on[i];
+      localStorage.setItem(keyState(lang), JSON.stringify(on));
+      render(arr, on);
+      checkWin(on);
+    };
     grid.appendChild(d);
   });
 }
@@ -47,12 +144,17 @@ function checkWin(on){
   const lines=[];
   for(let r=0;r<5;r++){lines.push([0,1,2,3,4].map(c=>r*5+c))}
   for(let c=0;c<5;c++){lines.push([0,1,2,3,4].map(r=>r*5+c))}
-  lines.push([0,6,12,18,24], [4,8,12,16,20]);
-  if(lines.some(L=>L.every(i=>on[i]))){alert("🎉 БИНГО! Позови ведущего за приз!");}
+  lines.push([0,6,12,18,24],[4,8,12,16,20]);
+  if(lines.some(L=>L.every(i=>on[i]))){
+    alert(I18N[lang].win);
+  }
 }
-document.getElementById('new').onclick=build;
-document.getElementById('clear').onclick=()=>{localStorage.removeItem(key); render(JSON.parse(localStorage.getItem('bingoItems')), {})}
-const savedItems=JSON.parse(localStorage.getItem('bingoItems')||"null");
-const savedState=JSON.parse(localStorage.getItem(key)||"{}");
-savedItems?render(savedItems,savedState):build();
+
+/* ---------- кнопки ---------- */
+$('#new').onclick = build;
+$('#clear').onclick = ()=>{
+  localStorage.removeItem(keyState(lang));
+  render(JSON.parse(localStorage.getItem(keyItems(lang))), {});
+};
 </script>
+</html>
